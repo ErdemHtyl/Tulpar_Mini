@@ -1,0 +1,185 @@
+(footprint "SS34"
+	(version 20260206)
+	(generator "pcbnew")
+	(generator_version "10.0")
+	(layer "F.Cu")
+	(property "Reference" "D**"
+		(at 0 -4 0)
+		(unlocked yes)
+		(layer "F.SilkS")
+		(uuid "e2461013-2721-4a0d-860c-fafc6b3d401e")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.1)
+			)
+		)
+	)
+	(property "Value" "SS34"
+		(at 0 1 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "84f127e6-621c-461a-8c0c-77d72332b9aa")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Datasheet" "https://www.onsemi.com/download/data-sheet/pdf/ss39-d.pdf"
+		(at 0 0 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "717bb222-00b9-42d0-919f-52c1d70b8a82")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Description" "Diode 40 V 3A Surface Mount DO-214AB (SMC)"
+		(at 0 0 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "0cc8769c-4786-401b-97de-9f0302085d03")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(attr smd)
+	(duplicate_pad_numbers_are_jumpers no)
+	(fp_line
+		(start -4.75 -3.25)
+		(end -4.75 3.25)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(layer "F.SilkS")
+		(uuid "d140fb57-ef32-48b9-baaa-b0b8cc2b49a2")
+	)
+	(fp_line
+		(start -4.75 -3.25)
+		(end 4.75 -3.25)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(layer "F.SilkS")
+		(uuid "9e12e62e-14bb-417d-893f-b83994c0c7cd")
+	)
+	(fp_line
+		(start -4.75 3.25)
+		(end 4.75 3.25)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(layer "F.SilkS")
+		(uuid "d34f8022-43b3-44cf-9eb7-ed14a40071db")
+	)
+	(fp_line
+		(start 4.75 3.25)
+		(end 4.75 -3.25)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(layer "F.SilkS")
+		(uuid "5d0aacb6-e2c3-4ee0-828f-c71a63159e5e")
+	)
+	(fp_poly
+		(pts
+			(xy -0.5 1.5) (xy -2 0) (xy -0.5 -1.5)
+		)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(fill yes)
+		(layer "F.SilkS")
+		(uuid "4ec27e41-b6f1-4cdd-9641-80f12b59926b")
+	)
+	(fp_line
+		(start -5 -3.75)
+		(end -5 3.75)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(layer "Dwgs.User")
+		(uuid "6e7d961a-fb07-4ae7-beae-b7661fec06a7")
+	)
+	(fp_line
+		(start -5 -3.75)
+		(end 5 -3.75)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(layer "Dwgs.User")
+		(uuid "0ace9c02-b818-4774-a756-90f8e2519a6d")
+	)
+	(fp_line
+		(start -5 -1.75)
+		(end -3 -3.75)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(layer "Dwgs.User")
+		(uuid "b426419a-70bb-4e1d-b850-dccb8668c516")
+	)
+	(fp_line
+		(start 5 -3.75)
+		(end 5 3.75)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(layer "Dwgs.User")
+		(uuid "b4133b0c-eab1-4b79-9c88-9dd0c354312e")
+	)
+	(fp_line
+		(start 5 3.75)
+		(end -5 3.75)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(layer "Dwgs.User")
+		(uuid "8a2cc850-666a-444c-b5f3-11056e366883")
+	)
+	(pad "1" smd rect
+		(at -3.405 0)
+		(size 2 3.4)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "04b86929-810f-4385-ab62-0e414809d64b")
+	)
+	(pad "2" smd rect
+		(at 3.405 0)
+		(size 2 3.4)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "cf4a779e-55d8-4cdd-b53f-0ef75dea6ee2")
+	)
+	(embedded_fonts no)
+	(model "C:/PCB_Projects/KiCad_Projects/MiniTulpar_FCB/STEPFILE/SS34.STEP"
+		(offset
+			(xyz 0 0 0)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz -90 -0 -0)
+		)
+	)
+)

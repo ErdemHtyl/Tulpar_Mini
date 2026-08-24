@@ -1,0 +1,203 @@
+(footprint "1206L075132WR"
+	(version 20260206)
+	(generator "pcbnew")
+	(generator_version "10.0")
+	(layer "F.Cu")
+	(property "Reference" "REF**"
+		(at 0 -2.25 0)
+		(unlocked yes)
+		(layer "F.SilkS")
+		(uuid "eba28f88-a38f-4399-a105-b1f4779ec2c2")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.1)
+			)
+		)
+	)
+	(property "Value" "1206L075132WR"
+		(at 0 1 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "204fc374-8429-48e1-8c8b-fa1a937ba2b4")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Datasheet" "https://www.littelfuse.com/assetdocs/resettable-ptcs-1206l-datasheet?assetguid=2b6a1515-d4ee-4c83-8bd4-152b4901b8f5"
+		(at 0 0 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "0378882f-319f-478c-94bf-a3e5eb3febaa")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Description" "Polymeric PTC Resettable Fuse 13.2V 750 mA Ih Surface Mount 1206 (3216 Metric), Concave"
+		(at 0 0 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "2beeb72b-3a29-4908-beec-145ba1f69ec6")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(attr smd)
+	(duplicate_pad_numbers_are_jumpers no)
+	(fp_line
+		(start -2.25 -1.25)
+		(end -2.25 1.25)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(layer "F.SilkS")
+		(uuid "c20e2355-4cf8-46a7-89da-916b690d9218")
+	)
+	(fp_line
+		(start -2.25 -1.25)
+		(end 2.25 -1.25)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(layer "F.SilkS")
+		(uuid "5904667d-0a2d-463f-ad0f-4caad228d04b")
+	)
+	(fp_line
+		(start -2.25 1.25)
+		(end 2.25 1.25)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(layer "F.SilkS")
+		(uuid "9d7e43d8-91e0-4799-985e-63a54ea737c6")
+	)
+	(fp_line
+		(start 2.25 -1.25)
+		(end 2.25 1.25)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(layer "F.SilkS")
+		(uuid "122c1fe1-3131-4fc9-8302-06a22f372167")
+	)
+	(fp_line
+		(start -2.5 -1.5)
+		(end 2.5 -1.5)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(layer "Dwgs.User")
+		(uuid "f29c7578-d374-4fbf-b6a8-0a1e7d12ab99")
+	)
+	(fp_line
+		(start -2.5 1.5)
+		(end -2.5 -1.5)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(layer "Dwgs.User")
+		(uuid "c3d71163-5a14-4ad1-9de5-c70ebde7355f")
+	)
+	(fp_line
+		(start -2.5 1.5)
+		(end 2.5 1.5)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(layer "Dwgs.User")
+		(uuid "ec0ecac7-9dc9-4558-a38e-a6fd05873ae8")
+	)
+	(fp_line
+		(start 2.5 -1.5)
+		(end 2.5 1.5)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(layer "Dwgs.User")
+		(uuid "38af5f0f-b4ec-4557-bfe8-3a831ce79b08")
+	)
+	(fp_line
+		(start -2.25 -1.25)
+		(end -2.25 1.25)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(layer "F.CrtYd")
+		(uuid "1b84a514-c0c7-4a33-8890-5e1f038e5935")
+	)
+	(fp_line
+		(start -2.25 1.25)
+		(end 2.25 1.25)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(layer "F.CrtYd")
+		(uuid "c3df6417-d3c5-46c0-8491-a538ffd89554")
+	)
+	(fp_line
+		(start 2.25 -1.25)
+		(end -2.25 -1.25)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(layer "F.CrtYd")
+		(uuid "272791d1-2b4f-42ee-8749-59e3b0c2f625")
+	)
+	(fp_line
+		(start 2.25 1.25)
+		(end 2.25 -1.25)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(layer "F.CrtYd")
+		(uuid "26a47c20-3a72-4ad9-8cf7-553ff596eae4")
+	)
+	(pad "1" smd rect
+		(at -1.4 0)
+		(size 1 1.8)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "83887107-048b-45db-a410-190e3c32d3a2")
+	)
+	(pad "2" smd rect
+		(at 1.4 0)
+		(size 1 1.8)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "39d2d387-b088-41a7-b590-cbd164547f6a")
+	)
+	(embedded_fonts no)
+	(model "C:/PCB_Projects/KiCad_Projects/MiniTulpar_FCB/STEPFILE/polyfuse.STEP"
+		(offset
+			(xyz 0 0 0)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz -90 -0 -0)
+		)
+	)
+)

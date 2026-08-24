@@ -1,0 +1,235 @@
+(footprint "CONN03_530480310_MOL"
+	(version 20260206)
+	(generator "pcbnew")
+	(generator_version "10.0")
+	(layer "F.Cu")
+	(tags "530480310 ")
+	(property "Reference" "REF**"
+		(at 0.75 -2.25 0)
+		(unlocked yes)
+		(layer "F.SilkS")
+		(uuid "5908d443-a12f-4403-a671-4e922520f21d")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Value" "CONN03_530480310_MOL"
+		(at 1.25 0 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "05481983-80a2-4b1f-a200-a66a1d3341c2")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Datasheet" "https://www.molex.com/content/dam/molex/molex-dot-com/products/automated/en-us/salesdrawingpdf/530/53048/530480310_sd.pdf?inline"
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "0da8c73d-0651-428a-bdb4-35954e63a6a2")
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+	)
+	(property "Description" "Connector Header Through Hole, Right Angle 3 position 0.049\" (1.25mm)"
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "48f0e292-3e95-4992-bb31-b0db0edfe2c7")
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+	)
+	(attr through_hole)
+	(duplicate_pad_numbers_are_jumpers no)
+	(fp_line
+		(start -1.6329 -1.177)
+		(end -1.6329 4.5888)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "525a01b6-014f-4f89-8f19-499cbecc06f0")
+	)
+	(fp_line
+		(start -1.6329 4.5888)
+		(end 4.1329 4.5888)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "d4225690-45eb-4a9b-81da-e25043fed2cf")
+	)
+	(fp_line
+		(start 4.1329 -1.177)
+		(end -1.6329 -1.177)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "b35c0ab7-dcda-4310-b242-c9b4ab693d47")
+	)
+	(fp_line
+		(start 4.1329 4.5888)
+		(end 4.1329 -1.177)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "8c635e28-2eff-45ac-bc2b-3e72940dddc7")
+	)
+	(fp_poly
+		(pts
+			(xy -1.25 -0.25) (xy -0.75 0) (xy -1.25 0.25)
+		)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(fill yes)
+		(layer "F.SilkS")
+		(uuid "71b43def-1408-47da-be4e-0cffc1274d94")
+	)
+	(fp_line
+		(start -1.7599 -1.304)
+		(end -1.7599 4.7158)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(layer "F.CrtYd")
+		(uuid "79d5630f-b329-439d-b4be-039bc033166d")
+	)
+	(fp_line
+		(start -1.7599 4.7158)
+		(end 4.2599 4.7158)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(layer "F.CrtYd")
+		(uuid "2215bb7b-d730-41af-971c-4f17f2e4aae1")
+	)
+	(fp_line
+		(start 4.2599 -1.304)
+		(end -1.7599 -1.304)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(layer "F.CrtYd")
+		(uuid "e814918a-19be-435d-887d-8438d472ec56")
+	)
+	(fp_line
+		(start 4.2599 4.7158)
+		(end 4.2599 -1.304)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(layer "F.CrtYd")
+		(uuid "778aba76-1e56-4851-bbbf-a201664e7d0f")
+	)
+	(fp_line
+		(start -1.5059 -1.05)
+		(end -1.5059 4.4618)
+		(stroke
+			(width 0.0254)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "878e10e0-8590-4df4-a9bd-b0c8b84a1a44")
+	)
+	(fp_line
+		(start -1.5059 4.4618)
+		(end 4.0059 4.4618)
+		(stroke
+			(width 0.0254)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "b4ab3746-7167-4a74-9074-a862ce848d90")
+	)
+	(fp_line
+		(start 4.0059 -1.05)
+		(end -1.5059 -1.05)
+		(stroke
+			(width 0.0254)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "57e11302-494b-4719-b4f8-9a45a25204be")
+	)
+	(fp_line
+		(start 4.0059 4.4618)
+		(end 4.0059 -1.05)
+		(stroke
+			(width 0.0254)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "1de1de13-83b4-4270-a381-79030b395d8d")
+	)
+	(fp_circle
+		(center 0 0)
+		(end 0.381 0)
+		(stroke
+			(width 0.508)
+			(type solid)
+		)
+		(fill no)
+		(layer "F.Fab")
+		(uuid "0a73b76d-cab7-4416-ba32-4254316c066b")
+	)
+	(pad "1" thru_hole circle
+		(at 0 0)
+		(size 1.0668 1.0668)
+		(drill 0.5588)
+		(layers "*.Cu" "*.Mask")
+		(remove_unused_layers no)
+		(uuid "4757e8db-c7ab-4902-927f-ab6a0c35c43a")
+	)
+	(pad "2" thru_hole circle
+		(at 1.25 0)
+		(size 1.0668 1.0668)
+		(drill 0.5588)
+		(layers "*.Cu" "*.Mask")
+		(remove_unused_layers no)
+		(uuid "288c86ae-2239-40b9-ae9c-680d5f05af83")
+	)
+	(pad "3" thru_hole circle
+		(at 2.5 0)
+		(size 1.0668 1.0668)
+		(drill 0.5588)
+		(layers "*.Cu" "*.Mask")
+		(remove_unused_layers no)
+		(uuid "3fd45eec-ecd5-4b57-a684-c5b68ea9cdde")
+	)
+	(embedded_fonts no)
+	(model "C:/PCB_Projects/KiCad_Projects/MiniTulpar_FCB/STEPFILE/530480310.stp"
+		(offset
+			(xyz 1.25 -5.45 0.3)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz -0 -0 -0)
+		)
+	)
+)

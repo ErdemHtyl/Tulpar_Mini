@@ -1,0 +1,4 @@
+(fp_lib_table
+	(version 7)
+	(lib (name "ftp") (type "KiCad") (uri "${KIPRJMOD}/ftp.pretty") (options "") (descr ""))
+)
