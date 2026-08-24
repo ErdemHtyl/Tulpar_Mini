@@ -430,6 +430,7 @@ buildable on a smaller budget:
   ICM-42670-P / BMP581)
 - A reduced-feature build — dropping the blackbox flash, the magnetometer or the
   gimbal outputs where they are not needed
+- A 2-layer variant to cut fabrication cost
 - Widely stocked, low-cost alternatives for the passives, connectors and the
   regulator
 - Where a substitution changes the firmware, the difference will be documented
@@ -528,15 +529,29 @@ non-functional**, but they should be decided before fabrication.
 
 ## License
 
-Dual-licensed. Copyright © 2026 Erdem Hatayoğlu.
+**BSD 3-Clause License** — Copyright © 2026 Erdem Hatayoğlu.
 
-| Path | License |
-|---|---|
-| `firmware/` | **MIT** — permissive, usable in closed-source and commercial products |
-| `hardware/` | **CERN-OHL-S v2** — strongly reciprocal; modified designs must be published under the same licence |
-| `docs/` | **CC BY-SA 4.0** |
+One licence covers the whole repository: firmware, hardware design files and
+documentation. It is permissive — you may use, modify and redistribute this
+work in source and binary form, including commercially and in closed-source
+products, provided that:
 
-Full terms and the SPDX headers to use on new files: [`LICENSE.md`](LICENSE.md)
+- the copyright notice, the list of conditions and the disclaimer are retained
+- neither the project name nor the author's name is used to endorse or promote
+  derived products without prior written permission
+
+The work comes with no warranty of any kind. Full text: [`LICENSE`](LICENSE)
+
+New files should carry an SPDX header so each file's licence is unambiguous:
+
+```
+SPDX-License-Identifier: BSD-3-Clause
+SPDX-FileCopyrightText: 2026 Erdem Hatayoğlu
+```
+
+Third-party files (vendor headers, generated peripheral libraries, imported
+footprints) keep the licence of their original author; where such a file carries
+its own licence header, that header takes precedence.
 
 ---
 
