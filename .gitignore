@@ -1,0 +1,25 @@
+# KiCad
+*-backups/
+*.kicad_prl
+fp-info-cache
+*.bak
+
+# STM32 / derleme çıktıları
+build/
+Debug/
+Release/
+.pio/
+*.o
+*.elf
+*.bin
+*.hex
+*.map
+
+# Editör ve OS
+.vscode/
+.idea/
+Thumbs.db
+
+# Uçuş logları — büyük, repoya girmesin
+logs/
+*.bbl
