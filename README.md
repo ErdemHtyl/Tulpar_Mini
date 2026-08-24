@@ -1,107 +1,109 @@
-# MiniTULPAR — Özel Tasarım Uçuş Kontrol Kartı (FCB)
+# MiniTULPAR — Custom Flight Controller Board (FCB)
 
-> Sıfırdan tasarlanan, STM32F405 tabanlı quadcopter uçuş kontrol kartı.
-> Şematik, 4 katmanlı PCB, güç mimarisi, sensör entegrasyonu ve firmware'in
-> tamamı bu repoda — hazır bir açık kaynak uçuş kontrolcüsü kullanılmıyor.
+> A quadcopter flight controller designed from scratch around the STM32F405.
+> Schematic, 4-layer PCB, power architecture, sensor integration and firmware
+> all live in this repository — no existing open-source flight controller is
+> used.
 
 <p align="left">
-  <img alt="Donanım" src="https://img.shields.io/badge/donan%C4%B1m-Rev%20A-blue">
-  <img alt="Firmware" src="https://img.shields.io/badge/firmware-geli%C5%9Ftirme%20a%C5%9Famas%C4%B1nda-orange">
+  <img alt="Hardware" src="https://img.shields.io/badge/hardware-Rev%20A-blue">
+  <img alt="Firmware" src="https://img.shields.io/badge/firmware-in%20development-orange">
   <img alt="MCU" src="https://img.shields.io/badge/MCU-STM32F405RGT6-green">
-  <img alt="PCB" src="https://img.shields.io/badge/PCB-4%20katman%20%C2%B7%2053.6%20%C3%97%2053.6%20mm-lightgrey">
+  <img alt="PCB" src="https://img.shields.io/badge/PCB-4%20layer%20%C2%B7%2053.6%20%C3%97%2053.6%20mm-lightgrey">
   <img alt="EDA" src="https://img.shields.io/badge/EDA-KiCad-informational">
 </p>
 
 ---
 
-## ⚠️ Proje Durumu
+## ⚠️ Project Status
 
-Bu proje **aktif geliştirme aşamasındadır**. Aşağıdaki tablo neyin hazır,
-neyin devam ettiğini gösterir:
+This project is **under active development**. The table below shows what is
+finished and what is still in progress:
 
-| Bileşen | Durum | Not |
+| Component | Status | Notes |
 |---|---|---|
-| Şematik tasarımı | ✅ Rev A tamamlandı | `MiniTulpar_Schematic.pdf` |
-| PCB yerleşimi (4 katman) | ✅ Tamamlandı | 53.6 × 53.6 mm, 1.6 mm |
-| Üretim dosyaları (Gerber/BOM/CPL) | ✅ Üretildi | `mfr/` |
-| Sistem mimarisi dokümantasyonu | ✅ Tamamlandı | `docs/architecture.md` |
-| Kart üretimi ve dizgi | 🔄 Planlanıyor | — |
-| **Firmware** | 🚧 **Henüz başlanmadı / geliştirme aşamasında** | Aşağıdaki yol haritasına bakınız |
-| Uçuş testleri | ⏳ Bekliyor | Firmware'e bağlı |
+| Schematic design | ✅ Rev A complete | `MiniTulpar_Schematic.pdf` |
+| PCB layout (4 layer) | ✅ Complete | 53.6 × 53.6 mm, 1.6 mm |
+| Manufacturing files (Gerber/BOM/CPL) | ✅ Generated | `mfr/` |
+| System architecture documentation | ✅ Complete | `docs/architecture.md` |
+| Board fabrication and assembly | 🔄 Planned | — |
+| **Firmware** | 🚧 **Not started / in development** | See the roadmap below |
+| Flight testing | ⏳ Blocked | Depends on firmware |
 
-> **Firmware notu:** Bu depodaki `firmware/` ağacı şu an bir **iskeletten**
-> ibarettir. Sürücüler, sensör füzyonu, PID kontrol ve güvenlik katmanı henüz
-> yazılmamıştır; mimari kararlar (bus dağılımı, timer/DMA atamaları, kesme
-> öncelikleri) `docs/architecture.md` içinde önceden belgelenmiştir ve
-> geliştirme bu doküman üzerinden ilerleyecektir. **Kart bu hâliyle uçmaz.**
-
----
-
-## İçindekiler
-
-- [Projenin Amacı](#projenin-amacı)
-- [Donanım Özeti](#donanım-özeti)
-- [Sistem Mimarisi](#sistem-mimarisi)
-- [Bus Dağılımı ve Gerekçeleri](#bus-dağılımı-ve-gerekçeleri)
-- [Timer ve DMA Dağılımı](#timer-ve-dma-dağılımı)
-- [Pin Haritası](#pin-haritası)
-- [Firmware Yol Haritası](#firmware-yol-haritası)
-- [Repo Yapısı](#repo-yapısı)
-- [Geliştirme Ortamı](#geliştirme-ortamı)
-- [Bilinen Konular ve Rev B Notları](#bilinen-konular-ve-rev-b-notları)
-- [Lisans](#lisans)
+> **Firmware note:** the `firmware/` tree in this repository is currently only a
+> **skeleton**. Drivers, sensor fusion, PID control and the safety layer have
+> not been written yet. The architectural decisions behind them — bus
+> allocation, timer/DMA assignments, interrupt priorities — are documented in
+> advance in `docs/architecture.md`, and development will follow that document.
+> **The board does not fly in its current state.**
 
 ---
 
-## Projenin Amacı
+## Table of Contents
 
-Amaç, hazır bir uçuş kontrolcüsü (Betaflight/ArduPilot donanımı) satın alıp
-kullanmak yerine **her donanım ve yazılım bileşenini tasarlamak, anlamak ve
-uygulamak**. Bu kapsamda:
-
-- Çok katmanlı PCB tasarımı ve güç mimarisi
-- IMU / barometre / manyetometre sürücülerinin sıfırdan yazılması
-- Sensör füzyonu (Mahony / Madgwick / EKF)
-- PID tabanlı stabilizasyon ve mixer
-- DShot ESC protokolünün doğrudan timer + DMA ile üretilmesi
-- GPS, telemetri, blackbox kayıt ve failsafe/güvenlik katmanı
-
-Her tasarım kararı, reddedilen alternatifi ve reddedilme sebebiyle birlikte
-`docs/architecture.md` içinde kayıt altındadır.
+- [Project Goal](#project-goal)
+- [Hardware Overview](#hardware-overview)
+- [System Architecture](#system-architecture)
+- [Bus Allocation and Rationale](#bus-allocation-and-rationale)
+- [Timer and DMA Allocation](#timer-and-dma-allocation)
+- [Pin Map](#pin-map)
+- [Firmware Roadmap](#firmware-roadmap)
+- [Repository Layout](#repository-layout)
+- [Development Environment](#development-environment)
+- [Known Issues and Rev B Notes](#known-issues-and-rev-b-notes)
+- [License](#license)
 
 ---
 
-## Donanım Özeti
+## Project Goal
 
-| Özellik | Değer |
+The goal is to **design, understand and implement every hardware and software
+component** rather than buying an off-the-shelf flight controller (Betaflight /
+ArduPilot hardware). That includes:
+
+- Multi-layer PCB design and power architecture
+- Writing IMU / barometer / magnetometer drivers from scratch
+- Sensor fusion (Mahony / Madgwick / EKF)
+- PID-based stabilisation and mixing
+- Generating the DShot ESC protocol directly from timers and DMA
+- GPS, telemetry, blackbox logging and the failsafe/safety layer
+
+Every design decision is recorded in `docs/architecture.md` together with the
+alternative that was rejected and the reason it was rejected.
+
+---
+
+## Hardware Overview
+
+| Feature | Value |
 |---|---|
 | MCU | **STM32F405RGT6** — Cortex-M4F, 168 MHz, 1 MB Flash, 192 KB RAM (128 KB SRAM + 64 KB CCM) |
-| Osilatör | 8 MHz HSE (ECS-80-10-30B-CKM-TR) |
-| PCB | 4 katman, 53.6 × 53.6 mm, 1.6 mm kalınlık |
-| Güç | USB-C 5 V ↔ VIN, Schottky OR (D2/D3) + JP1 jumper → **LD39200PU33R** 3.3 V / 2 A LDO |
+| Oscillator | 8 MHz HSE (ECS-80-10-30B-CKM-TR) |
+| PCB | 4 layer, 53.6 × 53.6 mm, 1.6 mm thickness |
+| Power | USB-C 5 V ↔ VIN, Schottky OR (D2/D3) + JP1 jumper → **LD39200PU33R** 3.3 V / 2 A LDO |
 | IMU | **ICM-42670-P** (accel + gyro) — SPI1 @ 21 MHz, INT1 → PC4 |
-| Barometre | **BMP581** — I2C2, 0x46, INT → PB1 |
-| Manyetometre | **IIS2MDC** — I2C2, 0x1E, DRDY → PB2 |
+| Barometer | **BMP581** — I2C2, 0x46, INT → PB1 |
+| Magnetometer | **IIS2MDC** — I2C2, 0x1E, DRDY → PB2 |
 | Blackbox flash | **W25Q128JVS** 16 MB — SPI2 @ 21 MHz |
-| Motor çıkışı | 4× **DShot600** — TIM8_CH1..CH4 (PC6–PC9), tek DMA burst |
-| Yardımcı PWM | TIM1_CH1/CH3 (PA8/PA10) + TIM3_CH1/CH2 (PB4/PB5 — kamera gimbal) |
-| RC girişi | CRSF / ELRS — UART4 (J10) |
+| Motor outputs | 4× **DShot600** — TIM8_CH1..CH4 (PC6–PC9), single DMA burst |
+| Auxiliary PWM | TIM1_CH1/CH3 (PA8/PA10) + TIM3_CH1/CH2 (PB4/PB5 — camera gimbal) |
+| RC input | CRSF / ELRS — UART4 (J10) |
 | GPS | USART2 (J12) |
-| Telemetri | UART5 (J11) |
-| Yedek UART | USART3 (J5) |
-| Harici I²C | I2C1 (J6) — dahili sensör bus'ından ayrı |
-| ADC | Batarya voltajı → PC3 (ADC1_IN13), harici → PC2 (ADC1_IN12) |
-| USB | USB-C 2.0, USBLC6-2SC6 ESD koruma + polyfuse + 5.1 kΩ CC |
-| Debug | 10 pin 1.27 mm SWD (J13) |
-| LED | 3× durum LED'i + güç LED'i |
+| Telemetry | UART5 (J11) |
+| Spare UART | USART3 (J5) |
+| External I²C | I2C1 (J6) — separate from the internal sensor bus |
+| ADC | Battery voltage → PC3 (ADC1_IN13), external → PC2 (ADC1_IN12) |
+| USB | USB-C 2.0, USBLC6-2SC6 ESD protection + polyfuse + 5.1 kΩ CC |
+| Debug | 10-pin 1.27 mm SWD (J13) |
+| LEDs | 3× status LEDs + power LED |
 
 ---
 
-## Sistem Mimarisi
+## System Architecture
 
 ```mermaid
 flowchart TB
-    subgraph PWR["Güç Ağacı"]
+    subgraph PWR["Power Tree"]
         XT[["VIN / Rail"]]
         USB5[["USB-C 5 V"]]
         OR{{"D2 / D3 Schottky OR<br/>+ JP1"}}
@@ -117,30 +119,30 @@ flowchart TB
         CORE["Cortex-M4F<br/>FPU + DSP"]
     end
 
-    subgraph FAST["Yüksek hız — SPI1 @ 21 MHz"]
+    subgraph FAST["High rate — SPI1 @ 21 MHz"]
         IMU["U2 ICM-42670-P<br/>CS = PA4 · INT1 → PC4"]
     end
 
-    subgraph SLOW["Yavaş sensör bus'ı — I2C2 @ 400 kHz"]
+    subgraph SLOW["Slow sensor bus — I2C2 @ 400 kHz"]
         BARO["U4 BMP581 · 0x46"]
         MAG["U6 IIS2MDC · 0x1E"]
     end
 
-    subgraph LOG["Kayıt — SPI2 @ 21 MHz"]
+    subgraph LOG["Logging — SPI2 @ 21 MHz"]
         FLASH["U7 W25Q128JVS<br/>16 MB · CS = PB12"]
     end
 
-    subgraph ACT["Aktüatör"]
+    subgraph ACT["Actuators"]
         ESC["4× ESC · DShot600<br/>TIM8_CH1..CH4"]
         SERVO["Aux PWM · TIM1 / TIM3"]
     end
 
-    subgraph COMM["Seri hatlar"]
+    subgraph COMM["Serial links"]
         RC["CRSF/RC · UART4"]
         GPS["GPS · USART2"]
-        TLM["Telemetri · UART5"]
-        AUX["Yedek · USART3"]
-        EXTI2C["Harici I2C1"]
+        TLM["Telemetry · UART5"]
+        AUX["Spare · USART3"]
+        EXTI2C["External I2C1"]
     end
 
     V33 --> MCU
@@ -157,316 +159,316 @@ flowchart TB
     EXTI2C <--> CORE
 ```
 
-**Kritik veri yolu:** IMU'nun INT1 hattı EXTI kesmesini tetikler → SPI1 DMA
-burst okuması başlar → DMA tamamlanma kesmesi filtre + PID + mixer zincirini
-çalıştırır → sonuç DShot çerçevesine kodlanıp TIM8 DMA'ya verilir. Bu zincirin
-tamamı **tek bir kesme bağlamında**, başka hiçbir çevre birimini beklemeden
-tamamlanır.
+**The critical data path:** the IMU's INT1 line raises an EXTI interrupt → a
+SPI1 DMA burst read starts → the DMA completion interrupt runs the filter, PID
+and mixer chain → the result is encoded into a DShot frame and handed to the
+TIM8 DMA. The whole chain completes **inside one interrupt context**, never
+waiting on any other peripheral.
 
 ---
 
-## Bus Dağılımı ve Gerekçeleri
+## Bus Allocation and Rationale
 
-Mimarinin temel ilkesi:
+The founding principle of the architecture:
 
-> **Kritik yol SPI'da, kritik olmayan yol I²C'de.**
+> **The critical path lives on SPI. Everything non-critical lives on I²C.**
 
-| Cihaz | Bus | Hız | Neden |
+| Device | Bus | Speed | Why |
 |---|---|---|---|
-| ICM-42670-P | **SPI1** (tek başına) | 21 MHz | Tek yüksek hızlı yol; I²C'de aynı okuma ~68× uzun sürer |
-| BMP581 + IIS2MDC | **I2C2** (paylaşımlı) | 400 kHz | Toplam bus yükü ~%4; kritik yolda değiller |
-| W25Q128JVS | **SPI2** (tek başına) | 21 MHz | 400 ms'ye kadar süren sektör silme IMU okumasını bekletmemeli |
-| Harici cihazlar | **I2C1** | 400 kHz | Kablo = ESD + kapasitans + kilitlenme riski; dahili sensörlerden yalıtıldı |
+| ICM-42670-P | **SPI1** (alone) | 21 MHz | The only high-rate path; the same read takes ~68× longer on I²C |
+| BMP581 + IIS2MDC | **I2C2** (shared) | 400 kHz | ~4 % combined bus load; neither is on the critical path |
+| W25Q128JVS | **SPI2** (alone) | 21 MHz | A sector erase can take 400 ms and must never delay a gyro read |
+| External devices | **I2C1** | 400 kHz | A cable means ESD, capacitance and lockup risk — isolated from the internal sensors |
 
-**IMU neden SPI'da?** 15 baytlık bir örnek okuması SPI1'de ~5.7 µs, I²C
-Fast-mode'da ~388 µs sürer:
+**Why the IMU is on SPI.** A 15-byte sample read takes ~5.7 µs on SPI1 versus
+~388 µs on I²C Fast-mode:
 
-| Döngü hızı | SPI yükü | I²C yükü |
+| Loop rate | SPI load | I²C load |
 |---|---|---|
-| 1 kHz | %0.6 | %39 |
-| 1.6 kHz | %0.9 | %62 |
-| 4 kHz | %2.3 | imkânsız |
+| 1 kHz | 0.6 % | 39 % |
+| 1.6 kHz | 0.9 % | 62 % |
+| 4 kHz | 2.3 % | impossible |
 
-Bant genişliğinin ötesinde: SPI deterministiktir (clock stretching yok), bus
-kilitlenmesi riski taşımaz, ESC'lerin 20–40 kHz'de anahtarladığı gürültülü
-ortamda push-pull sürücüsüyle daha dayanıklıdır ve DMA ile CPU'ya sıfır yük
-bindirir.
+Beyond bandwidth: SPI is deterministic (no clock stretching), has no bus-lockup
+failure mode, survives the noisy environment of ESCs switching at 20–40 kHz
+thanks to its push-pull drivers, and costs the CPU nothing when paired with DMA.
 
 ---
 
-## Timer ve DMA Dağılımı
+## Timer and DMA Allocation
 
-### ⚠️ TIM3 kanal çakışması — bilerek çözüldü, geri alınmamalı
+### ⚠️ The TIM3 channel conflict — resolved by design, do not undo it
 
-PC6 (DSHOT_1) ve PB4 (CAM_GIMBAL2) **aynı timer kanalının** (TIM3_CH1) iki
-alternatif pinidir. Bir kanal aynı anda tek bir pine yönlendirilebilir.
+PC6 (DSHOT_1) and PB4 (CAM_GIMBAL2) are two alternate pins for the **same timer
+channel**, TIM3_CH1. A channel can only be routed to one pin at a time.
 
-**Çözüm: DShot TIM8'e atandı.** Bu sayede dört motor çıkışı ve gimbal PWM'leri
-aynı anda çalışır. Ek olarak TIM8 APB2'de olduğu için timer saati 168 MHz'dir
-(TIM3'ün iki katı → DShot bit zamanlamasında iki kat çözünürlük) ve advanced
-timer olduğundan break girişi ileride donanımsal motor kesme için kullanılabilir.
+**Resolution: DShot is assigned to TIM8.** All four motor outputs and the gimbal
+PWM outputs then work simultaneously. TIM8 also sits on APB2, so its timer clock
+is 168 MHz (twice TIM3's → twice the DShot bit-timing resolution), and being an
+advanced-control timer it has a break input that can later drive a hardware
+motor cutoff.
 
-> Bu bir tercih değil **kısıttır**. DShot'ı TIM3'e taşımak zararsız görünür ama
-> gimbal çıkışlarını sessizce öldürür.
+> This is a **constraint, not a preference**. Moving DShot to TIM3 looks harmless
+> and silently kills the gimbal outputs.
 
-### DShot600 zamanlama (TIM8 @ 168 MHz)
+### DShot600 timing (TIM8 @ 168 MHz)
 
-| Protokol | ARR | "0" CCR | "1" CCR | Çerçeve |
+| Protocol | ARR | CCR for "0" | CCR for "1" | Frame |
 |---|---|---|---|---|
 | DShot300 | 559 | 210 | 420 | 53.3 µs |
 | **DShot600** | **279** | **105** | **210** | **26.7 µs** |
 
-DShot dijitaldir: **ESC kalibrasyonu diye bir adım kalmaz** ve her çerçevede
-4-bit CRC bulunur — gürültüden bozulan komut sessizce yanlış gaz uygulamak
-yerine ESC tarafından atılır.
+DShot is digital: **ESC calibration stops being a step that exists**, and every
+frame carries a 4-bit CRC — a command corrupted by noise is discarded by the ESC
+instead of silently applying the wrong throttle.
 
-### DMA atamaları (RM0090 Tablo 42/43 kısıtlarına göre)
+### DMA assignments (under the RM0090 Table 42/43 constraints)
 
 **DMA2**
 
-| Stream | Kanal | Atama |
+| Stream | Ch | Assignment |
 |---|---|---|
-| S0 | 3 | SPI1_RX — IMU okuma *(en kritik yol)* |
-| S1 | 7 | TIM8_UP — DShot burst çıkışı |
-| S5 | 3 | SPI1_TX — IMU komut |
-| S2/S3/S4/S7 | 7 | *Rezerve:* çift yönlü DShot (v1'de kullanılmıyor) |
+| S0 | 3 | SPI1_RX — IMU read *(the critical path)* |
+| S1 | 7 | TIM8_UP — DShot burst output |
+| S5 | 3 | SPI1_TX — IMU command |
+| S2/S3/S4/S7 | 7 | *Reserved:* bidirectional DShot (unused in v1) |
 
 **DMA1**
 
-| Stream | Kanal | Atama |
+| Stream | Ch | Assignment |
 |---|---|---|
-| S0 | 4 | UART5_RX — telemetri |
-| S1 | 4 | USART3_RX — yedek |
-| S2 | 4 | UART4_RX — CRSF/RC *(420 kbaud, kritik)* |
+| S0 | 4 | UART5_RX — telemetry |
+| S1 | 4 | USART3_RX — spare |
+| S2 | 4 | UART4_RX — CRSF/RC *(420 kbaud, critical)* |
 | S3 | 0 | SPI2_RX — flash |
 | S4 | 0 | SPI2_TX — blackbox |
 | S5 | 4 | USART2_RX — GPS (circular + IDLE) |
-| S6 | 4 | USART2_TX — GPS konfigürasyonu |
-| S7 | 4 | UART5_TX — telemetri |
+| S6 | 4 | USART2_TX — GPS configuration |
+| S7 | 4 | UART5_TX — telemetry |
 
-I2C1/I2C2, UART4_TX, USART3_TX ve ADC1 kesme tabanlıdır — stream'ler daha
-kritik işlere gitmiştir ve yükleri ihmal edilebilir düzeydedir.
+I2C1/I2C2, UART4_TX, USART3_TX and ADC1 are interrupt-driven — their streams
+went to higher-value work and their load is negligible.
 
-### Kesme öncelikleri (NVIC)
+### Interrupt priorities (NVIC)
 
-| Öncelik | Kesme |
+| Priority | Interrupt |
 |---|---|
-| 0 | EXTI4 — IMU INT1 (örnekleme anını damgalar) |
-| 1 | DMA2_S0 — SPI1_RX tamam (kontrol zincirinin tetikleyicisi) |
-| 2 | DMA2_S1 — TIM8_UP (motor çerçevesi) |
+| 0 | EXTI4 — IMU INT1 (timestamps the sampling instant) |
+| 1 | DMA2_S0 — SPI1_RX complete (triggers the control chain) |
+| 2 | DMA2_S1 — TIM8_UP (motor frame) |
 | 3 | DMA1_S2 — UART4_RX (RC / failsafe) |
 | 4 | DMA1_S5 — USART2_RX (GPS) |
 | 5 | I2C2_EV / I2C2_ER |
 | 6 | SysTick |
 | 7 | Flash, UART5, USB |
 
-> **Kural:** Blackbox yazımı, USB ve telemetri **hiçbir koşulda** kontrol
-> döngüsünü kesemez.
+> **The rule:** blackbox writes, USB and telemetry must **never** preempt the
+> control loop.
 
-### Hedef zamanlama bütçesi (1 kHz döngü)
+### Target timing budget (1 kHz loop)
 
-| Adım | Süre | CPU? |
+| Step | Duration | Occupies the CPU? |
 |---|---|---|
-| IMU SPI burst okuma | 5.7 µs | Hayır (DMA) |
-| Filtreleme (3× biquad + PT1) | ~10 µs | Evet |
-| Attitude (Mahony) | ~20 µs | Evet |
-| PID (3 eksen) | ~12 µs | Evet |
-| Mixer + limitleme | ~4 µs | Evet |
-| DShot kodlama | ~6 µs | Evet |
-| **Toplam CPU** | **~52 µs** | **≈ %5 yük** |
+| IMU SPI burst read | 5.7 µs | No (DMA) |
+| Filtering (3× biquad + PT1) | ~10 µs | Yes |
+| Attitude update (Mahony) | ~20 µs | Yes |
+| PID (3 axes) | ~12 µs | Yes |
+| Mixer + motor limiting | ~4 µs | Yes |
+| DShot frame encoding | ~6 µs | Yes |
+| **Total CPU** | **~52 µs** | **≈ 5 % load** |
 
 ---
 
-## Pin Haritası
+## Pin Map
 
-Firmware'in `board.h` dosyası bu tablodan türetilir — pin haritası iki yerde
-paralel tutulmaz.
+The firmware's `board.h` is derived from this table — the pin map is never
+maintained in two places.
 
-| Port | Sinyal | Fonksiyon |
+| Port | Signal | Function |
 |---|---|---|
 | PA4 / PA5 / PA6 / PA7 | SPI1 CS/SCK/MISO/MOSI | IMU |
-| PC4 | INT_IMU1 | EXTI4 — veri hazır |
+| PC4 | INT_IMU1 | EXTI4 — data ready |
 | PB12 / PB13 / PB14 / PB15 | SPI2 CS/SCK/MISO/MOSI | Blackbox flash |
-| PB10 / PB11 | I2C2 SCL/SDA | Dahili sensör bus'ı |
+| PB10 / PB11 | I2C2 SCL/SDA | Internal sensor bus |
 | PB1 / PB2 | INT_BAR / INT_MAG | EXTI1 / EXTI2 |
-| PB8 / PB9 | I2C1 SCL/SDA | Harici konnektör (J6) |
+| PB8 / PB9 | I2C1 SCL/SDA | External connector (J6) |
 | PC6 / PC7 / PC8 / PC9 | DSHOT_1..4 | **TIM8_CH1..CH4** |
 | PA8 / PA10 | Aux PWM 1–2 | TIM1_CH1 / TIM1_CH3 |
 | PB4 / PB5 | CAM_GIMBAL2 / CAM_GIMBAL1 | TIM3_CH1 / TIM3_CH2 |
 | PA0 / PA1 | UART4 TX/RX | CRSF / RC (J10) |
 | PA2 / PA3 | USART2 TX/RX | GPS (J12) |
-| PC12 / PD2 | UART5 TX/RX | Telemetri (J11) |
-| PC10 / PC11 | USART3 TX/RX | Yedek (J5) |
-| PC2 / PC3 | ADC1_IN12 / ADC1_IN13 | Harici ADC / batarya |
+| PC12 / PD2 | UART5 TX/RX | Telemetry (J11) |
+| PC10 / PC11 | USART3 TX/RX | Spare (J5) |
+| PC2 / PC3 | ADC1_IN12 / ADC1_IN13 | External ADC / battery |
 | PA11 / PA12 / PA9 | USB DM/DP/VBUS | USB-C |
 | PA13 / PA14 | SWDIO / SWCLK | SWD (J13) |
-| PC13 / PC14 / PC15 | LD1 / LD2 / LD3 | Durum LED'leri ⚠ *(bkz. Bilinen Konular)* |
-| PH0 / PH1 | HSE IN/OUT | 8 MHz kristal |
+| PC13 / PC14 / PC15 | LD1 / LD2 / LD3 | Status LEDs ⚠ *(see Known Issues)* |
+| PH0 / PH1 | HSE IN/OUT | 8 MHz crystal |
 
-**Boştaki pinler:** PA15, PB0, PB3, PB6, PB7, PC0, PC1, PC5.
-PB6/PB7 = USART1, PB0/PB1 = TIM3_CH3/CH4, PB0 + PC5 ise ikinci bir IMU için
-gereken CS + INT çiftini oluşturur.
+**Unused and available:** PA15, PB0, PB3, PB6, PB7, PC0, PC1, PC5.
+PB6/PB7 = USART1, PB0/PB1 = TIM3_CH3/CH4, and PB0 + PC5 together are exactly the
+chip select + interrupt pair a second IMU would need.
 
-Tam pin tablosu (fiziksel pin numaraları dâhil): [`docs/architecture.md`](docs/architecture.md)
+Full pin table including physical pin numbers: [`docs/architecture.md`](docs/architecture.md)
 
 ---
 
-## Firmware Yol Haritası
+## Firmware Roadmap
 
-> 🚧 **Bu bölümdeki maddelerin tamamı henüz yapılmamıştır.** Sıra, bring-up
-> riskini en aza indirecek şekilde belirlenmiştir; her adım bir öncekinin
-> doğrulanmasını gerektirir.
+> 🚧 **Nothing in this section has been implemented yet.** The order is chosen to
+> minimise bring-up risk; each step depends on the previous one being verified.
 
-### Aşama 0 — Bring-up
-- [ ] Proje iskeleti (CMake + `arm-none-eabi-gcc`, STM32 HAL/LL)
-- [ ] SWD bağlantısı ve LED blink — kart canlı mı?
-- [ ] Clock tree: 8 MHz HSE → 168 MHz SYSCLK doğrulaması
-- [ ] `board.h` — pin haritasının tek kaynaktan türetilmesi
-- [ ] USB CDC üzerinden debug konsolu
+### Stage 0 — Bring-up
+- [ ] Project skeleton (CMake + `arm-none-eabi-gcc`, STM32 HAL/LL)
+- [ ] SWD connection and LED blink — is the board alive?
+- [ ] Clock tree: verify 8 MHz HSE → 168 MHz SYSCLK
+- [ ] `board.h` — derive the pin map from a single source
+- [ ] Debug console over USB CDC
 
-### Aşama 1 — Sensörler
-- [ ] SPI1 + DMA sürücüsü, ICM-42670-P WHO_AM_I
-- [ ] IMU ham okuma (INT1 → EXTI → DMA burst zinciri)
-- [ ] IMU dâhili UI filtre / ODR yapılandırması *(anti-aliasing kritik)*
-- [ ] I2C2 **bloklamayan durum makinesi** + timeout + bus kurtarma (9× SCL)
-- [ ] BMP581 sürücüsü (basınç → irtifa)
-- [ ] IIS2MDC sürücüsü + hard/soft-iron kalibrasyonu
-- [ ] Gyro/accel kalibrasyonu ve sıcaklık kompanzasyonu
+### Stage 1 — Sensors
+- [ ] SPI1 + DMA driver, ICM-42670-P WHO_AM_I
+- [ ] Raw IMU reads (INT1 → EXTI → DMA burst chain)
+- [ ] IMU internal UI filter / ODR configuration *(anti-aliasing is critical)*
+- [ ] I2C2 as a **non-blocking state machine** + timeouts + bus recovery (9× SCL)
+- [ ] BMP581 driver (pressure → altitude)
+- [ ] IIS2MDC driver + hard/soft-iron calibration
+- [ ] Gyro/accel calibration and temperature compensation
 
-### Aşama 2 — Aktüatör
-- [ ] TIM8 + DMAR burst ile DShot600 çerçeve üretimi
-- [ ] Motor test modu — **pervanesiz**, osiloskopla çerçeve doğrulama
-- [ ] Mixer (quad X) ve motor limitleme / airmode
+### Stage 2 — Actuators
+- [ ] DShot600 frame generation via TIM8 + DMAR burst
+- [ ] Motor test mode — **props off**, verify frames on a scope
+- [ ] Mixer (quad X), motor limiting / airmode
 
-### Aşama 3 — Kontrol
-- [ ] Gyro filtre zinciri (biquad LPF + notch + PT1)
-- [ ] Attitude estimation — Mahony (ileride EKF)
-- [ ] Rate PID döngüsü (acro mode)
-- [ ] Angle/horizon döngüsü (self-level)
-- [ ] PID kazanç ayarlama arayüzü
+### Stage 3 — Control
+- [ ] Gyro filter chain (biquad LPF + notch + PT1)
+- [ ] Attitude estimation — Mahony (EKF later)
+- [ ] Rate PID loop (acro mode)
+- [ ] Angle/horizon loop (self-level)
+- [ ] PID gain tuning interface
 
-### Aşama 4 — RC ve güvenlik
+### Stage 4 — RC and safety
 - [ ] CRSF parser (UART4 DMA + IDLE line)
-- [ ] Arming/disarming durum makinesi + sensör sağlık kontrolü
-- [ ] **IWDG** (~50 ms, yalnız ana kontrol döngüsü besler)
-- [ ] Gyro timeout → anında disarm
-- [ ] RC timeout (~500 ms) → kademeli gaz kesme failsafe
-- [ ] Batarya voltaj izleme + düşük voltaj uyarısı
+- [ ] Arming/disarming state machine + sensor health check
+- [ ] **IWDG** (~50 ms, fed only by the main control loop)
+- [ ] Gyro timeout → immediate disarm
+- [ ] RC timeout (~500 ms) → progressive throttle-cut failsafe
+- [ ] Battery voltage monitoring + low-voltage warning
 
-### Aşama 5 — Navigasyon ve kayıt
+### Stage 5 — Navigation and logging
 - [ ] GPS UBX/NMEA parser (USART2 DMA)
-- [ ] Blackbox kayıt (SPI2 → W25Q128, boşta ön-silme)
-- [ ] Telemetri (UART5) ve CRSF geri hattı
+- [ ] Blackbox logging (SPI2 → W25Q128, pre-erase while idle)
+- [ ] Telemetry (UART5) and the CRSF back-channel
 - [ ] Altitude hold → position hold → return-to-home
 
-### Aşama 6 — İleri seviye
-- [ ] Çift yönlü DShot (RPM telemetrisi) + RPM tabanlı notch filtre
-- [ ] EKF tabanlı sensör füzyonu
-- [ ] Host tarafında çalışan birim testler (HIL/SIL)
+### Stage 6 — Advanced
+- [ ] Bidirectional DShot (RPM telemetry) + RPM-based notch filtering
+- [ ] EKF-based sensor fusion
+- [ ] Host-side unit tests (HIL/SIL)
 
-**Güvenlik katmanı pazarlığa kapalıdır:** motorlar açılışta **her zaman**
-disarm durumundadır; arming için gaz kolu düşük + açık arm komutu + sensör
-sağlık kontrolü şarttır.
+**The safety layer is non-negotiable:** motors are **always** disarmed at
+power-up; arming requires low throttle plus an explicit arm command plus a
+sensor health check.
 
 ---
 
-## Repo Yapısı
+## Repository Layout
 
-Donanım ve firmware **tek repoda** (monorepo) tutulur — pin değiştiğinde hem
-KiCad hem dokümantasyon hem firmware aynı commit'te güncellenir.
+Hardware and firmware live in a **single repository** (monorepo) — when a pin
+changes, KiCad, the documentation and the firmware are all updated in the same
+commit.
 
 ```
 custom-fcb/
 ├── README.md
-├── docs/                    mimari, güç ağacı, pinout, BOM, test planı
-│   ├── architecture.md      tasarım kararları ve gerekçeleri (EN)
-│   ├── mimari.md            aynı doküman (TR)
+├── docs/                    architecture, power tree, pinout, BOM, test plan
+│   ├── architecture.md      design decisions and their rationale (EN)
+│   ├── mimari.md            the same document (TR)
 │   └── images/
 ├── hardware/
 │   ├── MiniTULPAR.kicad_pro / .kicad_sch / .kicad_pcb
-│   ├── libs/                özel sembol + footprint kütüphaneleri
+│   ├── libs/                custom symbol + footprint libraries
 │   ├── datasheets/
-│   └── production/          Gerber / drill / BOM / CPL — .gitignore'da
-└── firmware/                🚧 geliştirme aşamasında
+│   └── production/          Gerber / drill / BOM / CPL — gitignored
+└── firmware/                🚧 in development
     ├── src/drivers/         imu, baro, mag, gps, crsf, esc_dshot
     ├── src/fusion/          mahony / madgwick / ekf
     ├── src/control/         pid, rate/angle loop, mixer
     ├── src/telemetry/
     ├── src/safety/          failsafe, arming, watchdog
     ├── include/
-    └── tests/               host tarafında çalışan birim testler
+    └── tests/               host-side unit tests
 ```
 
-**Versiyon kontrolü kuralları**
+**Version control rules**
 
-- `hardware/production/` içeriği `.gitignore`'dadır. Gerber'lar yalnızca kart
-  siparişi anında, `git tag hw-vX.Y` ile birlikte elle eklenir — böylece hangi
-  kartın hangi dosyalardan üretildiği kesin bellidir.
-- Uçuş logları (`logs/`, `*.bbl`) repoya girmez.
-- `.gitattributes` ile satır sonları repoda LF olarak normalize edilir.
+- `hardware/production/` is gitignored. Gerbers are added by hand only when a
+  board is ordered, together with `git tag hw-vX.Y` — so it is always certain
+  which board was built from which files.
+- Flight logs (`logs/`, `*.bbl`) never enter the repository.
+- `.gitattributes` normalises line endings to LF in the repository.
 
 ---
 
-## Geliştirme Ortamı
+## Development Environment
 
-**Donanım tarafı**
+**Hardware side**
 
-| Araç | Sürüm / not |
+| Tool | Version / note |
 |---|---|
 | KiCad | 8.x |
-| Şema | `MiniTULPAR.kicad_sch` (+ `scheme_diagram.kicad_sch`) |
-| Özel footprint'ler | `ftp.pretty/` |
-| Özel semboller | `MiniTULPAR_sym.kicad_sym` |
+| Schematic | `MiniTULPAR.kicad_sch` (+ `scheme_diagram.kicad_sch`) |
+| Custom footprints | `ftp.pretty/` |
+| Custom symbols | `MiniTULPAR_sym.kicad_sym` |
 
-**Firmware tarafı** *(planlanan)*
+**Firmware side** *(planned)*
 
-| Araç | Not |
+| Tool | Note |
 |---|---|
 | Toolchain | `arm-none-eabi-gcc` |
 | Build | CMake + Ninja |
-| HAL | STM32CubeF4 (LL ağırlıklı, kritik yolda register seviyesi) |
+| HAL | STM32CubeF4 (mostly LL; register level on the critical path) |
 | Debug | ST-Link / J-Link + OpenOCD, SWO trace |
-| Ölçüm | DWT cycle counter ile döngü süresi profillemesi |
+| Measurement | Loop-time profiling with the DWT cycle counter |
 
-**Kart siparişi**
+**Ordering a board**
 
 ```powershell
-git tag -a hw-v0.1 -m "Ilk kart siparisi"
+git tag -a hw-v0.1 -m "First board order"
 git push --tags
 gh release create hw-v0.1 hardware\production\*.zip
 ```
 
 ---
 
-## Bilinen Konular ve Rev B Notları
+## Known Issues and Rev B Notes
 
-Şema incelemesinden çıkan maddeler. **Hiçbiri kartı çalışmaz kılmıyor**, ancak
-üretimden önce karara bağlanmalıdır.
+Findings from the schematic review. **None of them makes the board
+non-functional**, but they should be decided before fabrication.
 
-| # | Konu | Durum / öneri |
+| # | Issue | Status / recommendation |
 |---|---|---|
-| 1 | **PC13/PC14/PC15 LED sürüşü** — bu üç pin backup güç alanındadır, toplam 3 mA ile sınırlıdır ve datasheet **LED sürmeyi açıkça örnek vererek yasaklar**. Rev A'da pin → LED → 1 kΩ → GND (source) bağlantısı var. | LED'leri **sink** yapılandırmasına çevir (anot 3.3 V'a) ve/veya ikisini boştaki PC0/PC1'e taşı. Tek gerçek datasheet ihlali budur. |
-| 2 | **ICM-42670-P ODR tavanı 1.6 kHz** — bu, ailenin düşük güçlü üyesidir, ICM-42688-P değildir. 8 kHz döngü bu kartta **mümkün değil** (sensör kaynaklı, bus kaynaklı değil). | Hedef **1 kHz PID döngüsü**. Aliasing riski nedeniyle dâhili UI filtre bilinçli yapılandırılmalı ve IMU soft-mount edilmeli. |
-| 3 | **Harici I²C pull-up'ları** — I2C1 (R5/R6) 4.7 kΩ; kablo kapasitansıyla 300 ns yükselme süresi bütçesi aşılıyor. | **2.2 kΩ'a düşür** (~160 pF'e izin verir, sink akımı 1.5 mA). |
-| 4 | **SBUS desteği yok** — STM32F405'in UART'ları donanımsal sinyal terslemeyi desteklemez. | CRSF/ELRS kullanılacaksa sorun yok. SBUS isteniyorsa harici inverter (74LVC1G04) eklenmeli. |
-| 5 | **Batarya bölücüsü kart dışında**, aşırı gerilim koruması yok. | Rev B: PC3'e seri 1 kΩ + 3.3 V'a Schottky klemp. |
-| 6 | **Manyetometre konumu** — kart üstü IIS2MDC, motor akımlarının alanından etkilenir. | Birincil pusula olarak J6'daki GPS modülü pusulası; IIS2MDC yedek. Yerleşimde güç bölümünden mümkün olduğunca uzak. |
-| 7 | **LDO ısı bütçesi** — 500 mA yükte 5 V girişte 0.85 W. J5/J6/J7/J10/J11/J12 hepsi 3.3 V besliyor, tek bir GPS modülü 100–150 mA çekebilir. | LDO altına termal via dizisi; yük bütçesi `docs/power-tree.md`'ye çıkarılmalı. |
-| 8 | **Reset sonrası DShot pinleri** yüksek empedanslı olur. | ESC'lerin bu durumda gaz uygulamadığı doğrulanmalı; gerekirse motor hatlarına pull-down (Rev B). |
+| 1 | **LED drive on PC13/PC14/PC15** — these three pins are in the backup power domain, are limited to 3 mA combined, and the datasheet **explicitly names driving an LED as the forbidden case**. Rev A wires them pin → LED → 1 kΩ → GND (sourcing). | Flip the LEDs to a **sink** configuration (anode to 3.3 V) and/or move two of them to the unused PC0/PC1. This is the one actual datasheet violation. |
+| 2 | **ICM-42670-P ODR ceiling of 1.6 kHz** — this is the low-power member of the family, not the ICM-42688-P. An 8 kHz loop is **not possible** on this board (sensor-limited, not bus-limited). | Target a **1 kHz PID loop**. Because of the aliasing risk, the internal UI filter must be configured deliberately and the IMU soft-mounted. |
+| 3 | **External I²C pull-ups** — I2C1 (R5/R6) is 4.7 kΩ; with cable capacitance the 300 ns rise-time budget is exceeded. | **Drop to 2.2 kΩ** (allows ~160 pF, sink current 1.5 mA). |
+| 4 | **No SBUS support** — the STM32F405's UARTs have no hardware signal inversion. | Fine for CRSF/ELRS. If SBUS is wanted, an external inverter (74LVC1G04) has to be added. |
+| 5 | **The battery divider is off-board**, with no overvoltage protection. | Rev B: 1 kΩ series into PC3 plus a Schottky clamp to 3.3 V. |
+| 6 | **Magnetometer placement** — the on-board IIS2MDC is affected by the field the motor currents produce. | Use the GPS module's compass on J6 as the primary and keep the IIS2MDC as a backup. Place it as far from the power section as the layout allows. |
+| 7 | **LDO thermal budget** — 0.85 W at 500 mA with 5 V in. J5/J6/J7/J10/J11/J12 all supply 3.3 V, and a GPS module alone can draw 100–150 mA. | Thermal via array under the LDO; the load budget belongs in `docs/power-tree.md`. |
+| 8 | **DShot pins after reset** are high-impedance. | Confirm the ESCs do not apply throttle in that state; add pull-downs on the motor lines if they do (Rev B). |
 
 ---
 
-## Lisans
+## License
 
 - **Firmware:** MIT
-- **Donanım:** CERN-OHL-S v2
+- **Hardware:** CERN-OHL-S v2
 
 ---
 
-## Sorumluluk Reddi
+## Disclaimer
 
-Bu kart ve firmware **geliştirme aşamasındadır ve test edilmemiştir**. Dönen
-pervaneler ciddi yaralanmaya yol açabilir. Motor testlerini **her zaman
-pervaneler sökülmüş hâlde** yapın, ilk kapalı döngü denemelerini güvenli bir
-test tezgâhında gerçekleştirin ve arming/failsafe mantığını uçuştan önce
-doğrulayın. Bu projeyi kullanmanın sorumluluğu tamamen size aittir.
+This board and its firmware are **in development and untested**. Spinning
+propellers can cause serious injury. Always run motor tests **with the
+propellers removed**, perform the first closed-loop attempts on a safe test
+bench, and verify the arming and failsafe logic before flying. Use this project
+entirely at your own risk.
