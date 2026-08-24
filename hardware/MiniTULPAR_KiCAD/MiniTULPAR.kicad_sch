@@ -29,8 +29,8 @@
 		(uuid "12830087-1123-429e-8d4a-d8411f5d5fce")
 	)
 	(rectangle
-		(start 162.814 51.308)
-		(end 180.594 61.468)
+		(start 146.304 65.278)
+		(end 164.084 75.438)
 		(stroke
 			(width 0)
 			(type solid)
@@ -198,19 +198,6 @@
 		(uuid "cd57d58e-e58e-4ed8-98e6-9bf633a33acd")
 	)
 	(rectangle
-		(start 147.574 65.913)
-		(end 165.354 76.073)
-		(stroke
-			(width 0)
-			(type solid)
-		)
-		(fill
-			(type color)
-			(color 255 218 94 1)
-		)
-		(uuid "f18c9359-74fb-476c-b9b0-ce9f5d1d6e23")
-	)
-	(rectangle
 		(start 170.18 78.74)
 		(end 187.96 88.9)
 		(stroke
@@ -249,7 +236,7 @@
 	)
 	(text "CS will be connected to VDD_IO\nSA0 will be connected to GND"
 		(exclude_from_sim no)
-		(at 172.466 48.768 0)
+		(at 155.956 62.738 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -331,7 +318,7 @@
 	)
 	(text "I2C"
 		(exclude_from_sim no)
-		(at 161.798 77.978 0)
+		(at 157.226 80.01 0)
 		(effects
 			(font
 				(size 0.635 0.635)
@@ -351,18 +338,6 @@
 			(justify left)
 		)
 		(uuid "4bbb18c2-7b31-43db-9aa8-7a6d7c8f694e")
-	)
-	(text "Second\nAcc/Gyro"
-		(exclude_from_sim no)
-		(at 156.21 70.485 0)
-		(effects
-			(font
-				(size 1.905 1.905)
-				(thickness 0.381)
-				(bold yes)
-			)
-		)
-		(uuid "67d1440b-db7c-4644-914e-c71772d6c36f")
 	)
 	(text "USB"
 		(exclude_from_sim no)
@@ -446,7 +421,7 @@
 	)
 	(text "Barometre"
 		(exclude_from_sim no)
-		(at 171.45 55.88 0)
+		(at 154.94 69.85 0)
 		(effects
 			(font
 				(size 1.905 1.905)
@@ -454,18 +429,6 @@
 			)
 		)
 		(uuid "b10ae1af-c24f-4018-aa87-10b156094373")
-	)
-	(text "SPI"
-		(exclude_from_sim no)
-		(at 154.686 80.518 0)
-		(effects
-			(font
-				(size 0.635 0.635)
-				(thickness 0.254)
-				(bold yes)
-			)
-		)
-		(uuid "b3cf7780-1a43-4f61-bde5-324d4c549f8c")
 	)
 	(text "CRSF\nConnecteor"
 		(exclude_from_sim no)
@@ -744,16 +707,6 @@
 	)
 	(polyline
 		(pts
-			(xy 155.956 76.2) (xy 155.956 85.09)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "394671fa-b360-437f-b811-94f36a7dcf22")
-	)
-	(polyline
-		(pts
 			(xy 139.446 129.54) (xy 139.446 132.588)
 		)
 		(stroke
@@ -816,16 +769,6 @@
 	)
 	(polyline
 		(pts
-			(xy 167.894 69.85) (xy 166.116 69.85)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "52593484-4065-4983-b6af-3112d2367129")
-	)
-	(polyline
-		(pts
 			(xy 129.794 80.264) (xy 124.206 80.264)
 		)
 		(stroke
@@ -865,16 +808,6 @@
 			(color 255 0 7 1)
 		)
 		(uuid "62fd7c48-437c-4de2-b691-859364210494")
-	)
-	(polyline
-		(pts
-			(xy 166.116 78.486) (xy 158.242 78.486)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "72e9fc0d-e0b8-4ebc-b0eb-8ed749d1201a")
 	)
 	(polyline
 		(pts
@@ -1001,7 +934,7 @@
 	)
 	(polyline
 		(pts
-			(xy 158.242 78.486) (xy 158.242 85.09)
+			(xy 158.242 75.438) (xy 158.242 85.09)
 		)
 		(stroke
 			(width 0)
@@ -1021,16 +954,6 @@
 	)
 	(polyline
 		(pts
-			(xy 166.116 69.85) (xy 166.116 78.486)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "d9679864-1650-45ec-8eec-28d48c1b6c23")
-	)
-	(polyline
-		(pts
 			(xy 135.89 76.2) (xy 135.89 85.09)
 		)
 		(stroke
@@ -1038,16 +961,6 @@
 			(type default)
 		)
 		(uuid "e5201100-1cd1-488a-8d4f-b40ebe841934")
-	)
-	(polyline
-		(pts
-			(xy 167.894 61.468) (xy 167.894 69.85)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "e6b421ff-b0b5-4359-b9ff-77b57c2c82b9")
 	)
 	(polyline
 		(pts
@@ -1108,10 +1021,6 @@
 	(group ""
 		(uuid "535934ff-3261-4e52-b881-ab1ef7065319")
 		(members "3ac330e6-c631-435a-8309-469b2fe00aa6" "b10ae1af-c24f-4018-aa87-10b156094373")
-	)
-	(group ""
-		(uuid "69c0ac09-eff8-4116-ba57-34a1773a6af7")
-		(members "67d1440b-db7c-4644-914e-c71772d6c36f" "f18c9359-74fb-476c-b9b0-ce9f5d1d6e23")
 	)
 	(group ""
 		(uuid "7b628bab-4b1a-42ac-b17d-81b42e8a24f6")
