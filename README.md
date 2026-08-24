@@ -430,7 +430,6 @@ buildable on a smaller budget:
   ICM-42670-P / BMP581)
 - A reduced-feature build — dropping the blackbox flash, the magnetometer or the
   gimbal outputs where they are not needed
-- A 2-layer variant to cut fabrication cost
 - Widely stocked, low-cost alternatives for the passives, connectors and the
   regulator
 - Where a substitution changes the firmware, the difference will be documented
