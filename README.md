@@ -450,7 +450,8 @@ commit.
 custom-fcb/
 ├── README.md
 ├── docs/                    architecture, power tree, pinout, BOM, test plan
-│   ├── architecture.md      design decisions and their rationale
+│   ├── architecture.md      design decisions and their rationale (EN)
+│   ├── mimari.md            the same document (TR)
 │   └── images/
 ├── hardware/
 │   ├── MiniTULPAR.kicad_pro / .kicad_sch / .kicad_pcb
@@ -527,8 +528,15 @@ non-functional**, but they should be decided before fabrication.
 
 ## License
 
-- **Firmware:** MIT
-- **Hardware:** CERN-OHL-S v2
+Dual-licensed. Copyright © 2026 Erdem Hatayoğlu.
+
+| Path | License |
+|---|---|
+| `firmware/` | **MIT** — permissive, usable in closed-source and commercial products |
+| `hardware/` | **CERN-OHL-S v2** — strongly reciprocal; modified designs must be published under the same licence |
+| `docs/` | **CC BY-SA 4.0** |
+
+Full terms and the SPDX headers to use on new files: [`LICENSE.md`](LICENSE.md)
 
 ---
 
