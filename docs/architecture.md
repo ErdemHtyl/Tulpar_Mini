@@ -1,8 +1,8 @@
 # MiniTULPAR — System Architecture and Design Rationale
 
-**Board:** MiniTULPAR FCB · **Schematic revision:** Rev A, 2026-08-10
+**Board:** MiniTULPAR FCB · **Schematic revision:** Rev A (2026-08-10) + updated CubeMX pin configuration
 **MCU:** STM32F405RGT6 (LQFP64, 168 MHz, 1 MB Flash, 192 KB RAM)
-**Document status:** Reverse-engineered from the Rev A schematic; firmware decisions are proposals.
+**Document status:** Derived from the Rev A schematic and the current CubeMX pinout; firmware decisions are proposals.
 **Location:** `docs/architecture.md`
 
 > This document does not record *what* was built — it records **why it was built
@@ -16,12 +16,12 @@
 ## 0. Executive summary — the architecture in three sentences
 
 A single ICM-42670-P IMU sits alone on **SPI1** and is sampled on a data-ready
-interrupt; this is the only high-rate path on the board and it gets its own bus.
-Slow sensors — barometer and magnetometer — share **I2C2**, because their
-sampling rates cannot stress the bus and sharing buys back pins. All four motors
-are driven from **TIM8** over DShot through a single DMA stream (TIM8_UP with
-DMAR burst), and everything else flows through UART/DMA pairs that never touch
-the CPU.
+interrupt; this is the only high-rate path on the board and it gets a bus to
+itself. Slow sensors — barometer and magnetometer — share **I2C2**, because
+their sampling rates cannot stress the bus and sharing buys back pins. All four
+motors are driven from **TIM8** over DShot through a single DMA stream (TIM8_UP
+with DMAR burst), and everything else flows through UART/DMA pairs that never
+touch the CPU.
 
 ---
 
@@ -58,9 +58,9 @@ flowchart TB
         FLASH["U7 W25Q128JVS<br/>16 MB · CS = PB12"]
     end
 
-    subgraph ACT["Actuators — TIM8 + DMA"]
-        ESC["4× ESC<br/>DShot600<br/>PC6 PC7 PC8 PC9"]
-        SERVO["4× Aux PWM<br/>PA8 PA10 (TIM1)<br/>PB4 PB5 (TIM3)"]
+    subgraph ACT["Actuators"]
+        ESC["4× ESC · DShot600<br/>TIM8_CH1..CH4<br/>PC6 PC7 PC8 PC9"]
+        SERVO["Aux PWM<br/>TIM1_CH1/CH3 · PA8 PA10<br/>Gimbal · PB4 PB5 (TIM3)"]
     end
 
     subgraph COMM["Serial links"]
@@ -103,6 +103,70 @@ TIM8 DMA. The whole chain completes **inside one interrupt context**, never
 waiting on any other peripheral. Everything else — baro, mag, GPS, telemetry,
 logging — runs outside that chain at lower priority.
 
+### 1.1 Complete pin assignment
+
+STM32F405RGT6, LQFP64. This table is the intended single source of truth — the
+firmware's `board.h` should be derived from it, not maintained in parallel.
+
+| Pin | Port | Signal | Peripheral / alternate function |
+|---|---|---|---|
+| 20 | PA4 | SPI1_CS1 | GPIO output — IMU chip select |
+| 21 | PA5 | SPI1_SCK | SPI1 |
+| 22 | PA6 | SPI1_MISO | SPI1 |
+| 23 | PA7 | SPI1_MOSI | SPI1 |
+| 24 | PC4 | INT_IMU1 | EXTI4 — IMU data ready |
+| 33 | PB12 | SPI2_CS | GPIO output — flash chip select |
+| 34 | PB13 | SPI2_SCK | SPI2 |
+| 35 | PB14 | SPI2_MISO | SPI2 |
+| 36 | PB15 | SPI2_MOSI | SPI2 |
+| 29 | PB10 | I2C2_SCL | I2C2 — internal sensor bus |
+| 30 | PB11 | I2C2_SDA | I2C2 |
+| 27 | PB1 | INT_BAR | EXTI1 — BMP581 |
+| 28 | PB2 | INT_MAG | EXTI2 — IIS2MDC DRDY |
+| 61 | PB8 | I2C1_SCL | I2C1 — external connector |
+| 62 | PB9 | I2C1_SDA | I2C1 |
+| 37 | PC6 | DSHOT_1 | **TIM8_CH1** |
+| 38 | PC7 | DSHOT_2 | **TIM8_CH2** |
+| 39 | PC8 | DSHOT_3 | **TIM8_CH3** |
+| 40 | PC9 | DSHOT_4 | **TIM8_CH4** |
+| 41 | PA8 | Aux PWM 1 | TIM1_CH1 |
+| 43 | PA10 | Aux PWM 2 | TIM1_CH3 |
+| 57 | PB5 | CAM_GIMBAL1 | TIM3_CH2 |
+| 56 | PB4 | CAM_GIMBAL2 | TIM3_CH1 |
+| 14 | PA0 | UART4_TX | UART4 — CRSF / RC |
+| 15 | PA1 | UART4_RX | UART4 |
+| 16 | PA2 | USART2_TX | USART2 — GPS |
+| 17 | PA3 | USART2_RX | USART2 |
+| 51 | PC10 | USART3_TX | USART3 — spare |
+| 52 | PC11 | USART3_RX | USART3 |
+| 53 | PC12 | UART5_TX | UART5 — telemetry |
+| 54 | PD2 | UART5_RX | UART5 |
+| 10 | PC2 | ADC1 | ADC1_IN12 — external sense |
+| 11 | PC3 | Battery_Voltage | ADC1_IN13 |
+| 44 | PA11 | USB_OTG_FS_DM | USB |
+| 45 | PA12 | USB_OTG_FS_DP | USB |
+| 42 | PA9 | USB_OTG_FS_VBUS | USB VBUS detect |
+| 46 | PA13 | SWDIO | SYS_JTMS-SWDIO |
+| 49 | PA14 | SWCLK | SYS_JTCK-SWCLK |
+| 2 | PC13 | LD1 | GPIO — see §6.7 ⚠ |
+| 3 | PC14 | LD2 | GPIO — see §6.7 ⚠ |
+| 4 | PC15 | LD3 | GPIO — see §6.7 ⚠ |
+| 5 | PH0 | RCC_OSC_IN | HSE 8 MHz (X1) |
+| 6 | PH1 | RCC_OSC_OUT | HSE |
+| 7 | NRST | Reset | S1 button + 100 nF |
+| 60 | BOOT0 | Boot select | S2 SPDT switch |
+| 1 | VBAT | Backup supply | |
+| 13 / 12 | VDDA / VSSA | Analog supply | FB1 + 0.1 µF + 1 µF |
+| 31 / 47 | VCAP1 / VCAP2 | Core regulator | 2.2 µF each |
+| 19, 32, 48, 64 | VDD | Digital supply | 100 nF per pin |
+| 18, 63 | VSS | Ground | |
+
+**Unused and available:** PA15 (50), PB0 (26), PB3 (55), PB6 (58), PB7 (59),
+PC0 (8), PC1 (9), PC5 (25). Notable options among these: PB6/PB7 are USART1,
+PB0/PB1 are TIM3_CH3/CH4, and PC0/PC1 are unrestricted GPIOs — see §6.7 for why
+that last pair matters. Leave test points on all of them in the layout; it is
+cheap insurance.
+
 ---
 
 ## 2. Bus allocation and rationale
@@ -111,7 +175,7 @@ logging — runs outside that chain at lower priority.
 
 | Sensor / device | Bus | Clock | Sample rate | Why this bus |
 |---|---|---|---|---|
-| ICM-42670-P (accel/gyro) | **SPI1** | 21 MHz | up to 1.6 kHz | The only high-rate path; I²C bandwidth does not fit (§2.2) |
+| ICM-42670-P (accel/gyro) | **SPI1**, CS = PA4 | 21 MHz | up to 1.6 kHz | The only high-rate path; I²C bandwidth does not fit (§2.2) |
 | BMP581 (baro) | **I2C2** | 400 kHz | ~50–100 Hz | Slow; saves pins; not worth occupying an SPI |
 | IIS2MDC (mag) | **I2C2** | 400 kHz | 100 Hz | Same; I²C is also the part's native interface |
 | W25Q128JVS (log) | **SPI2** | 21 MHz | continuous block writes | Must not share a bus with the IMU (§2.4) |
@@ -120,6 +184,7 @@ logging — runs outside that chain at lower priority.
 | Telemetry | UART5 | 57600–115200 | ~10 Hz | Same |
 | Spare | USART3 | — | — | ESC telemetry / VTX / future use |
 | External I²C | I2C1 | 400 kHz | ≤100 Hz | Leaves the board on a cable — kept **separate** from the internal bus (§2.5) |
+| Camera gimbal | TIM3_CH1/CH2 (PB4/PB5) | 50–333 Hz | — | Servo-rate PWM; deliberately *not* on TIM8 (§3.1) |
 
 ### 2.2 DECISION: the IMU goes on **SPI1**, not on I²C
 
@@ -157,8 +222,17 @@ START + ADDR_W(9) + REG(9) + REPEATED START + ADDR_R(9) + 14×9 bits + STOP
 Because 388 µs > 125 µs, 8 kHz sampling physically does not fit on I²C — a
 single read consumes three times the whole period. At 1.6 kHz it technically
 "fits", but handing 62 % of a bus to one sensor means nothing else can ever
-share that bus. And there is no escape upward: the STM32F405's I²C peripheral
-**cannot exceed 400 kHz** — there is no Fast-mode Plus on this part.
+share that bus.
+
+And there is no escape upward. The ICM-42670-P's own I²C interface is rated to
+1 MHz, but **the STM32F405's I²C peripheral cannot exceed 400 kHz** — there is no
+Fast-mode Plus on this MCU, so the sensor's headroom is unreachable. Even if it
+were reachable, 155 bit-times at 1 MHz is 155 µs, still longer than a 125 µs
+period: 8 kHz would not fit on I²C at *any* clock this pairing can produce.
+
+(The SPI side has margin in hand by comparison: the part is rated to 24 MHz and
+the chosen 21 MHz sits just under it, arrived at by the APB2 ÷ 4 prescaler
+rather than by pushing the sensor.)
 
 **The reasons that have nothing to do with bandwidth — these matter just as
 much:**
@@ -290,26 +364,34 @@ well under the 3 mA I²C limit.
 
 ## 3. Timer and DMA allocation
 
-### 3.1 ⚠ Resolve this first: a TIM3 channel conflict
+### 3.1 The TIM3 constraint — already resolved, do not undo it
 
-The schematic uses these pins:
+The pins the board uses can each be reached by more than one timer, and two of
+those options overlap:
 
-| Net | Pin | Possible timer channels |
+| Net | Pin | Timer channels that can reach this pin |
 |---|---|---|
-| DSHOT_1 | PC6 | TIM3_CH1 · **TIM8_CH1** |
-| DSHOT_2 | PC7 | TIM3_CH2 · **TIM8_CH2** |
-| DSHOT_3 | PC8 | TIM3_CH3 · **TIM8_CH3** |
-| DSHOT_4 | PC9 | TIM3_CH4 · **TIM8_CH4** |
-| PWM_3 | PB4 | **TIM3_CH1** |
-| PWM_4 | PB5 | **TIM3_CH2** |
-| PWM_1 | PA8 | **TIM1_CH1** |
-| PWM_2 | PA10 | **TIM1_CH3** |
+| DSHOT_1 | PC6 | TIM3_CH1 · **TIM8_CH1** ← chosen |
+| DSHOT_2 | PC7 | TIM3_CH2 · **TIM8_CH2** ← chosen |
+| DSHOT_3 | PC8 | TIM3_CH3 · **TIM8_CH3** ← chosen |
+| DSHOT_4 | PC9 | TIM3_CH4 · **TIM8_CH4** ← chosen |
+| CAM_GIMBAL2 | PB4 | **TIM3_CH1** (only option) |
+| CAM_GIMBAL1 | PB5 | **TIM3_CH2** (only option) |
+| Aux PWM 1 | PA8 | **TIM1_CH1** (only option) |
+| Aux PWM 2 | PA10 | **TIM1_CH3** (only option) |
 
-**The problem:** PB4 and PC6 are two alternate pins for the *same* channel,
-TIM3_CH1. A timer channel can be routed to **one pin at a time**. Assign DShot
-to TIM3 and PWM_3/PWM_4 go dead; assign PWM to TIM3 and DSHOT_1/DSHOT_2 go dead.
+**The latent conflict:** PB4 and PC6 are two alternate pins for the *same*
+channel, TIM3_CH1 — and a timer channel can only be routed to **one pin at a
+time**. Route DShot through TIM3 and the gimbal outputs go dead; route the
+gimbal through TIM3 and DSHOT_1/DSHOT_2 go dead.
 
-**Resolution — no hardware change needed, this is purely a firmware decision:**
+**The current CubeMX configuration assigns DShot to TIM8, which avoids this
+entirely.** The gimbal keeps TIM3_CH1/CH2 and all four motor outputs work. This
+section exists so that nobody "simplifies" the design later by moving DShot to
+TIM3 — PC6–PC9 map to TIM3 just as naturally, the change looks harmless, and it
+silently kills the gimbal outputs.
+
+**The assignment to preserve:**
 
 | Function | Timer | Channel | Pin | Timer clock |
 |---|---|---|---|---|
@@ -317,10 +399,10 @@ to TIM3 and PWM_3/PWM_4 go dead; assign PWM to TIM3 and DSHOT_1/DSHOT_2 go dead.
 | Motor 2 | **TIM8** | CH2 | PC7 | 168 MHz |
 | Motor 3 | **TIM8** | CH3 | PC8 | 168 MHz |
 | Motor 4 | **TIM8** | CH4 | PC9 | 168 MHz |
-| Aux PWM 1 | TIM1 | CH1 | PA8 | 168 MHz |
+| Aux PWM 1 | TIM1 | CH1 | PA8 | 168 MHz (APB2) |
 | Aux PWM 2 | TIM1 | CH3 | PA10 | 168 MHz |
-| Aux PWM 3 | TIM3 | CH1 | PB4 | 84 MHz (APB1) |
-| Aux PWM 4 | TIM3 | CH2 | PB5 | 84 MHz |
+| Camera gimbal 2 | TIM3 | CH1 | PB4 | 84 MHz (APB1) |
+| Camera gimbal 1 | TIM3 | CH2 | PB5 | 84 MHz |
 
 **Why TIM8 rather than TIM3:**
 
@@ -333,10 +415,11 @@ to TIM3 and PWM_3/PWM_4 go dead; assign PWM to TIM3 and DSHOT_1/DSHOT_2 go dead.
 4. All four motors on **one timer** means they are bit-synchronous, and one DMA
    stream (TIM8_UP + DMAR burst) drives all of them.
 
-**Note:** since two aux PWM channels are on TIM1 and two on TIM3, driving servos
-means programming both timers to the same period (e.g. 50 Hz / 20 ms, or
-333 Hz) separately — and the prescaler values will differ, because one runs at
-168 MHz and the other at 84 MHz.
+**Note:** the four servo-rate outputs are split across TIM1 (PA8, PA10) and TIM3
+(PB4, PB5), so driving them at a common rate means programming both timers to
+the same period (e.g. 50 Hz / 20 ms, or 333 Hz) separately — and the prescaler
+values will differ, because TIM1 runs at 168 MHz and TIM3 at 84 MHz. For a
+camera gimbal this is harmless; the two axes only need to agree with themselves.
 
 ### 3.2 DShot timing numbers (TIM8 @ 168 MHz)
 
@@ -488,27 +571,92 @@ than the estimate.
 
 ---
 
-## 5. Sampling architecture, and one critical warning
+## 5. Sampling architecture and the ODR ceiling
 
-### 5.1 ⚠ The ICM-42670-P's ODR ceiling
+### 5.1 The ICM-42670-P's ODR ceiling
 
-**The ICM-42670-P's gyroscope output data rate is capped at 1.6 kHz.** This is
-the low-power member of the family — it is *not* the same part as the
-ICM-42688-P, which samples at 8 kHz / 32 kHz.
+*Verified against the TDK ICM-42670-P datasheet (DS-000451), not from memory.*
 
-The architectural consequences:
+**ODR — output data rate** — is the rate at which the sensor writes a *new*
+number into its output registers. The IMU runs on its own internal clock: it
+samples the MEMS structure, filters, decimates, and updates the registers at
+this fixed rate. **The ICM-42670-P's ODR range is 12.5 Hz – 1600 Hz for the
+gyroscope and 1.5625 Hz – 1600 Hz for the accelerometer.** 1.6 kHz is the
+ceiling. This is the low-power member of the family — it is *not* the
+ICM-42688-P, which reaches 32 kHz.
 
-1. **An 8 kHz control loop is not possible on this board** — not because of the
-   bus, but because of the sensor. The SPI decision is still correct (I²C would
-   eat 62 % of the bus even at 1.6 kHz), but the ceiling is set by the sensor.
-2. **The realistic target is a 1 kHz PID loop**, with the gyro sampled at
-   1.6 kHz ODR and passed through the internal filter. 1 kHz is more than enough
-   to stabilise a quadcopter; 8 kHz is what you want for aggressive acro and
-   RPM-based filtering.
-3. **Anti-aliasing becomes critical.** A lower ODR increases the risk of motor
-   vibration (typically a 100–500 Hz fundamental plus harmonics) folding into
-   the passband. The ICM-42670-P's internal UI filter must be configured
-   deliberately, and the IMU must be mechanically isolated with a soft mount.
+**Why the bus speed cannot rescue this.** At 1.6 kHz ODR the register contents
+change once every 625 µs. Reading them faster returns the same value again:
+
+```
+t = 0   µs → read → 142.7 °/s   (new)
+t = 125 µs → read → 142.7 °/s   ← identical
+t = 250 µs → read → 142.7 °/s   ← identical
+t = 375 µs → read → 142.7 °/s   ← identical
+t = 500 µs → read → 142.7 °/s   ← identical
+t = 625 µs → read → 148.1 °/s   (new)
+```
+
+An 8 kHz loop would execute 8000 times per second on 1600 distinct pieces of
+information. The extra 6400 iterations add nothing — and they actively harm the
+derivative term, which now sees a staircase: four periods of zero slope followed
+by a step. That is the worst possible input to a D term.
+
+**So the ceiling is set by the sensor, not by the bus.** The SPI decision in
+§2.2 remains correct — I²C would consume 62 % of the bus even at 1.6 kHz — but
+the second half of the argument ("8 kHz does not fit on I²C") never gets
+exercised on this board, because 8 kHz is unreachable anyway.
+
+**What a 1.6 kHz ODR would normally cost you — and why it does not here.** By
+Nyquist, a 1.6 kHz sample rate can faithfully represent content only up to
+800 Hz. Anything above that would normally fold back and appear at the wrong
+frequency. For a 5-inch quad at 25 000 rpm the arithmetic looks alarming:
+
+| Vibration component | True frequency | Would alias to, at 1.6 kHz |
+|---|---|---|
+| Fundamental (25000/60) | 417 Hz | 417 Hz — in band, correct |
+| 2nd harmonic | 833 Hz | 767 Hz — wrong place |
+| **3rd harmonic** | **1250 Hz** | **350 Hz** — indistinguishable from real motion |
+
+That third row is the classic failure: a 1250 Hz mechanical vibration would
+present itself to the gyro as a genuine 350 Hz rotation, the PID would chase it,
+and the motors would heat up while the aircraft fought itself.
+
+**The datasheet resolves this in the part's favour.** The ICM-42670-P's signal
+path is: ADC → **anti-alias filter (AAF)** → programmable 1st-order low-pass →
+ODR decimation. The AAF has fixed coefficients, is **not user-configurable and
+cannot be bypassed**, and it sits ahead of decimation — which is exactly where
+it needs to be. The aliasing scenario above is therefore handled in silicon, not
+left to you.
+
+**One condition attached, and it is the actionable part:** the datasheet
+describes the AAF as active in **Low-Noise Mode**. Low-Power Mode is a different
+signal path. So:
+
+> **Run the gyro in Low-Noise Mode.** This is not a performance preference — it
+> is what keeps the anti-alias filter in the path. Do not let a power-saving
+> change quietly move the part into Low-Power Mode.
+
+**The architectural consequences:**
+
+1. **An 8 kHz control loop is not possible on this board** — sensor-limited, not
+   bus-limited. The SPI decision stands regardless; it is just that the
+   8 kHz half of the argument never gets exercised here.
+2. **Target a 1 kHz PID loop**, gyro sampled at 1.6 kHz ODR. This is not a
+   concession: ArduPilot and PX4 have flown 400 Hz–1 kHz loops for years.
+   Betaflight's 8 kHz exists for racing feel and RPM-based filtering, neither of
+   which is a first-board requirement.
+3. **Set `GYRO_UI_FILT_BW` deliberately** — the programmable low-pass after the
+   AAF is yours to choose, and its reset default is not a design decision.
+4. **Still soft-mount the IMU.** The AAF prevents high-frequency energy from
+   *aliasing*, but it does not prevent it from saturating the sensor or from
+   consuming dynamic range. Keeping vibration out mechanically remains the
+   cheapest filter on the aircraft.
+5. **The FIFO is available if wanted:** 2.25 KB total, of which 1 KB is
+   allocated to the FIFO by default (the rest is reserved for the APEX motion
+   features, and can be reclaimed by disabling them). Not needed for a
+   straightforward interrupt-per-sample design, but it is there if batching ever
+   becomes useful.
 
 **Recommendation:** target 1 kHz with this board — the architecture is sound and
 the learning value is intact. If Rev B wants a higher loop rate, the
@@ -539,27 +687,22 @@ FIFO watermark interrupt; for now one INT line is sufficient.
 
 ## 6. Findings from the schematic review
 
-These came out of reading Rev A. None of them makes the board non-functional,
-but the first three should be **decided before the board is ordered**.
+These came out of reading Rev A against the current pin configuration. None of
+them makes the board non-functional.
 
-### 6.1 The block diagram sheet disagrees with the schematic
+### 6.1 Block diagram sheet vs schematic — ✅ resolved
 
-Sheet 1 (block diagram) and sheet 2 (schematic) contradict each other:
+The Rev A block diagram sheet disagreed with the schematic on the barometer part
+number, the IMU count and the bus quantities. This has been corrected. Keep the
+habit: whenever the schematic changes, the block diagram sheet changes in the
+same commit, or the two drift apart again.
 
-| Block diagram says | Schematic shows |
-|---|---|
-| Barometer → **BMP388** | **BMP581** (U4, 0x46) |
-| **Two** accel/gyro parts (primary + secondary) | **One** ICM-42670-P (U2) |
-| 1× / 2× I2C, 3× / 4× UART (the TR and EN sheets also disagree with each other) | 2× I2C, 4× UART |
-| A "Safety Switch" block | No equivalent in the schematic (S1 = NRST button, S2 = BOOT0 switch) |
+### 6.2 TIM3 channel conflict — ✅ avoided by design
 
-Update the block diagram sheet to match the schematic — otherwise in six months
-you will not remember which one was true.
-
-### 6.2 TIM3 channel conflict
-
-Detailed in §3.1. No hardware change needed, but the firmware **must** assign
-DShot to TIM8. Write this into `docs/pinout.md` as well.
+The latent conflict between DShot and the gimbal outputs over TIM3_CH1/CH2 is
+documented in §3.1. The current configuration puts DShot on **TIM8**, which
+avoids it. Record this in `docs/pinout.md` as a constraint, not a preference —
+the failure mode if someone moves DShot to TIM3 later is silent.
 
 ### 6.3 Magnetometer placement
 
@@ -625,12 +768,29 @@ an inverted signal.
 
 ### 6.7 Smaller notes
 
-- **PC13/PC14/PC15 drive the LEDs.** These three pins are in the backup power
-  domain and the datasheet limits them to **3 mA total**. With 1 kΩ resistors
-  they draw ~1.3 mA (red/green), inside the limit — but the LEDs will be dim and
-  these pins cannot be driven above 2 MHz. Acceptable; just record that it was
-  deliberate. Also, using PC14/PC15 means **no LSE crystal can be fitted** (the
-  RTC can only run from the internal LSI) — irrelevant for a flight controller.
+- **⚠ LD1/LD2/LD3 on PC13/PC14/PC15 — check the LED polarity.** These three pins
+  sit in the backup power domain and are fed through an internal power switch.
+  The STM32F405 datasheet is explicit about them: their total current is limited
+  to **3 mA for all three combined**, they must not be driven above 2 MHz, and
+  **they must not be used as a current source — the datasheet names driving an
+  LED as the example.** In the Rev A schematic the LEDs are wired
+  pin → LED → 1 kΩ → GND, which is exactly the sourcing configuration the
+  datasheet warns against, and at ~1.3 mA each, two lit at once already consumes
+  the budget for all three.
+
+  Two fixes, both cheap:
+  1. **Flip the LEDs to sink** — anode to +3.3 V, cathode through the resistor to
+     the pin, driven low to light. No extra parts, just a schematic change, and
+     it turns a forbidden configuration into an allowed one. Firmware logic
+     inverts.
+  2. **Move LEDs to PC0/PC1** — both are unused normal I/Os in the current
+     pinout, with no backup-domain restriction. Two of the three LEDs could
+     move there for free.
+
+  Recommendation: do both — move two LEDs to PC0/PC1 and flip whatever stays on
+  PC13–PC15 to sink configuration. Also note that using PC14/PC15 means **no LSE
+  crystal can be fitted** (the RTC runs from the internal LSI only), which is
+  irrelevant for a flight controller.
 - **Crystal load capacitors.** C13/C14 = 10 pF, R1 = 0 Ω. Load capacitance is
   chosen as `C = 2 × (CL − C_stray)`; assuming C_stray ≈ 3–5 pF, 10 pF
   corresponds to a crystal with CL ≈ 7–7.5 pF. Verify the CL of the crystal you
@@ -644,10 +804,10 @@ an inverted signal.
 - **Flash /HOLD and /WP** pulled to 3.3 V through 10 kΩ ✓.
 - **USB protection:** USBLC6-2SC6 + polyfuse + 5.1 kΩ CC resistors ✓ correct.
 - **IIS2MDC C1 pin** decoupled with 220 nF to GND ✓ as the datasheet requires.
-- **Unused pins:** PA15, PB0, PB3, PB6, PB7, PC0, PC1, PC5. Since PB6/PB7 are
-  USART1 and PB0/PB1 are TIM3_CH3/CH4, an extra serial link or motor output can
-  come from there later. Leaving test points on these pins in the layout is
-  cheap insurance.
+- **Unused pins:** PA15, PB0, PB3, PB6, PB7, PC0, PC1, PC5 — listed with their
+  options in §1.1. PB0 and PC5 are worth calling out: together they are exactly
+  what a second IMU would need (a chip select and an interrupt line), so if
+  redundancy comes back on the table in Rev B, the pins are already free.
 
 ---
 
@@ -704,22 +864,28 @@ sufficient and have more predictable timing.
 
 ## 9. Next steps
 
-1. **Update the block diagram sheet to match the schematic** (§6.1) — the
-   cheapest fix available and the one that prevents the most confusion.
-2. **Confirm the ICM-42670-P ODR ceiling from the datasheet** (§5.1) and record
-   the resulting target loop rate in `README.md`.
-3. **Create `docs/pinout.md`** — make the pin table in this document the single
-   source of truth, and derive the firmware's `board.h` from it.
-4. **Create `docs/power-tree.md`** — the 3.3 V load budget and the LDO thermal
+1. **Fix the LED drive on PC13–PC15** (§6.7) — the one item here that is an
+   actual datasheet violation rather than a preference. Flip to sink
+   configuration and/or move two LEDs to the unused PC0/PC1.
+2. **Record the 1 kHz target loop rate in `README.md`** (§5.1) — the ODR ceiling
+   and the anti-alias behaviour are now confirmed from the datasheet; what
+   remains is making sure the gyro is initialised in **Low-Noise Mode** with
+   `GYRO_UI_FILT_BW` set deliberately, and writing that into the IMU driver as a
+   commented requirement rather than a bare register value.
+3. **Revisit the I2C1 pull-ups** (§2.5) — 4.7 kΩ → 2.2 kΩ for the cabled bus.
+4. **Decide SBUS vs CRSF** (§6.6); if SBUS, an inverter has to go on the board.
+5. **Add battery-sense protection** (§6.5) — 1 kΩ series into PC3 plus a clamp.
+6. **Create `docs/power-tree.md`** — the 3.3 V load budget and the LDO thermal
    calculation (§6.4).
-5. **Revisit the I2C1 pull-ups** (§2.5) — 4.7 kΩ → 2.2 kΩ.
-6. **Decide SBUS vs CRSF** (§6.6); if SBUS, an inverter has to go into Rev A.
-7. **Firmware bring-up order:** SWD + LED blink, then raw IMU reads over SPI1,
+7. **Derive `board.h` from §1.1** — do not maintain the pin map in two places.
+8. **Firmware bring-up order:** SWD + LED blink, then raw IMU reads over SPI1,
    then DShot output (props off!), then closed loop.
 
 ---
 
-*Document revision 1.0 · 2026-08-24 · Sources: MiniTULPAR Rev A schematic
-(2026-08-10), STM32F405 datasheet and the RM0090 reference manual.*
+*Document revision 1.2 · 2026-08-24 · Sources: MiniTULPAR Rev A schematic
+(2026-08-10) and the current CubeMX pin configuration; STM32F405 datasheet and
+the RM0090 reference manual; TDK ICM-42670-P datasheet DS-000451 (ODR range,
+AAF behaviour, 24 MHz SPI / 1 MHz I²C limits and FIFO size verified against it).*
 *DMA stream/channel assignments follow RM0090 Tables 42/43; verify them against
 the reference manual once the final pin and peripheral selections are frozen.*
