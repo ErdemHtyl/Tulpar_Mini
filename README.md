@@ -26,16 +26,20 @@ finished and what is still in progress:
 | PCB layout (4 layer) | ✅ Complete | 53.6 × 53.6 mm, 1.6 mm |
 | Manufacturing files (Gerber/BOM/CPL) | ✅ Generated | `mfr/` |
 | System architecture documentation | ✅ Complete | `docs/architecture.md` |
+| Pin configuration (CubeMX) | ✅ Verified | No timer channel conflicts |
+| Clock tree configuration | ✅ Verified | 168 MHz SYSCLK, 48 MHz USB |
 | Board fabrication and assembly | 🔄 Planned | — |
-| **Firmware** | 🚧 **Not started / in development** | See the roadmap below |
+| **Firmware** | 🚧 **In development — not started** | See the roadmap below |
 | Flight testing | ⏳ Blocked | Depends on firmware |
+| Lower-cost board variants | 🔄 Planned | See [Planned Variants](#planned-variants) |
 
-> **Firmware note:** the `firmware/` tree in this repository is currently only a
-> **skeleton**. Drivers, sensor fusion, PID control and the safety layer have
-> not been written yet. The architectural decisions behind them — bus
-> allocation, timer/DMA assignments, interrupt priorities — are documented in
-> advance in `docs/architecture.md`, and development will follow that document.
-> **The board does not fly in its current state.**
+> **Firmware note:** the firmware is **in development**. Nothing described in
+> the roadmap below has been implemented yet — drivers, sensor fusion, PID
+> control and the safety layer are all still to be written. The architectural
+> decisions behind them (bus allocation, timer/DMA assignments, interrupt
+> priorities) are documented in advance in `docs/architecture.md`, and
+> development will follow that document. **The board does not fly in its
+> current state.**
 
 ---
 
@@ -47,7 +51,9 @@ finished and what is still in progress:
 - [Bus Allocation and Rationale](#bus-allocation-and-rationale)
 - [Timer and DMA Allocation](#timer-and-dma-allocation)
 - [Pin Map](#pin-map)
+- [Clock Configuration](#clock-configuration)
 - [Firmware Roadmap](#firmware-roadmap)
+- [Planned Variants](#planned-variants)
 - [Repository Layout](#repository-layout)
 - [Development Environment](#development-environment)
 - [Known Issues and Rev B Notes](#known-issues-and-rev-b-notes)
@@ -197,19 +203,32 @@ thanks to its push-pull drivers, and costs the CPU nothing when paired with DMA.
 
 ## Timer and DMA Allocation
 
-### ⚠️ The TIM3 channel conflict — resolved by design, do not undo it
+### Timer assignment
 
-PC6 (DSHOT_1) and PB4 (CAM_GIMBAL2) are two alternate pins for the **same timer
-channel**, TIM3_CH1. A channel can only be routed to one pin at a time.
+The current CubeMX pin configuration is **conflict-free** — all four motor
+outputs, both auxiliary PWM channels and both gimbal channels are usable at the
+same time:
 
-**Resolution: DShot is assigned to TIM8.** All four motor outputs and the gimbal
-PWM outputs then work simultaneously. TIM8 also sits on APB2, so its timer clock
-is 168 MHz (twice TIM3's → twice the DShot bit-timing resolution), and being an
-advanced-control timer it has a break input that can later drive a hardware
-motor cutoff.
+| Function | Timer | Channel | Pin | Timer clock |
+|---|---|---|---|---|
+| Motor 1–4 | **TIM8** | CH1–CH4 | PC6 / PC7 / PC8 / PC9 | 168 MHz (APB2) |
+| Aux PWM 1–2 | TIM1 | CH1 / CH3 | PA8 / PA10 | 168 MHz (APB2) |
+| Camera gimbal 1–2 | TIM3 | CH2 / CH1 | PB5 / PB4 | 84 MHz (APB1) |
 
-> This is a **constraint, not a preference**. Moving DShot to TIM3 looks harmless
-> and silently kills the gimbal outputs.
+The motors are on **TIM8** rather than TIM3 for four reasons:
+
+1. TIM3_CH1 can be routed to either PC6 or PB4, but only one at a time — putting
+   the motors on TIM8 leaves TIM3 entirely free for the gimbal outputs.
+2. TIM8 sits on APB2, so its timer clock is 168 MHz (twice TIM3's) — twice the
+   DShot bit-timing resolution.
+3. TIM8 is an advanced-control timer: its break input can drive a hardware motor
+   cutoff for failsafe later.
+4. All four motors on one timer are bit-synchronous and need only a single DMA
+   burst (TIM8_UP + DMAR).
+
+Because the two gimbal channels sit on TIM3 (84 MHz) and the aux PWM channels on
+TIM1 (168 MHz), driving both at a common servo rate means programming the two
+timers separately with different prescaler values.
 
 ### DShot600 timing (TIM8 @ 168 MHz)
 
@@ -281,7 +300,7 @@ went to higher-value work and their load is negligible.
 
 ## Pin Map
 
-The firmware's `board.h` is derived from this table — the pin map is never
+This table is the single source of truth for the pin map — it is never
 maintained in two places.
 
 | Port | Signal | Function |
@@ -302,7 +321,7 @@ maintained in two places.
 | PC2 / PC3 | ADC1_IN12 / ADC1_IN13 | External ADC / battery |
 | PA11 / PA12 / PA9 | USB DM/DP/VBUS | USB-C |
 | PA13 / PA14 | SWDIO / SWCLK | SWD (J13) |
-| PC13 / PC14 / PC15 | LD1 / LD2 / LD3 | Status LEDs ⚠ *(see Known Issues)* |
+| PC13 / PC14 / PC15 | LD1 / LD2 / LD3 | Status LEDs |
 | PH0 / PH1 | HSE IN/OUT | 8 MHz crystal |
 
 **Unused and available:** PA15, PB0, PB3, PB6, PB7, PC0, PC1, PC5.
@@ -313,16 +332,42 @@ Full pin table including physical pin numbers: [`docs/architecture.md`](docs/arc
 
 ---
 
+## Clock Configuration
+
+8 MHz HSE crystal → PLL (M = 4, N = 168, P = 2) → **168 MHz SYSCLK**, with the
+PLL Q divider set to 7 for the 48 MHz USB clock. CSS (clock security system) is
+enabled, so a crystal failure falls back to the HSI instead of stopping the
+core.
+
+| Domain | Prescaler | Frequency |
+|---|---|---|
+| SYSCLK / HCLK (AHB, core, memory, DMA) | /1 | **168 MHz** |
+| APB1 peripheral clock (PCLK1) | /4 | 42 MHz |
+| APB1 timer clock (TIM3 …) | — | 84 MHz |
+| APB2 peripheral clock (PCLK2) | /2 | 84 MHz |
+| APB2 timer clock (**TIM1, TIM8**) | — | **168 MHz** |
+| USB OTG FS | PLL /Q = 7 | 48 MHz |
+| IWDG | LSI | 32 kHz |
+
+The RTC runs from the internal LSI — no LSE crystal is fitted, because PC14/PC15
+are used as status LED outputs. This is irrelevant for a flight controller.
+
+SPI1 and SPI2 both run at 21 MHz: SPI1 from PCLK2 (84 MHz ÷ 4) and SPI2 from
+PCLK1 (42 MHz ÷ 2), both comfortably under the ICM-42670-P's 24 MHz and the
+W25Q128's 133 MHz limits.
+
+---
+
 ## Firmware Roadmap
 
 > 🚧 **Nothing in this section has been implemented yet.** The order is chosen to
 > minimise bring-up risk; each step depends on the previous one being verified.
 
 ### Stage 0 — Bring-up
-- [ ] Project skeleton (CMake + `arm-none-eabi-gcc`, STM32 HAL/LL)
+- [ ] Project skeleton and build system
 - [ ] SWD connection and LED blink — is the board alive?
-- [ ] Clock tree: verify 8 MHz HSE → 168 MHz SYSCLK
-- [ ] `board.h` — derive the pin map from a single source
+- [ ] Bring up the clock tree on hardware and measure it (8 MHz HSE → 168 MHz)
+- [ ] Generate the pin configuration from the pin map above
 - [ ] Debug console over USB CDC
 
 ### Stage 1 — Sensors
@@ -371,6 +416,31 @@ sensor health check.
 
 ---
 
+## Planned Variants
+
+MiniTULPAR Rev A is the reference design — it is deliberately built with
+good parts rather than cheap ones, so that when something misbehaves the cause
+is the design and not the bill of materials.
+
+**More affordable versions of this board will be added later.** The plan is to
+publish lower-cost variants alongside the reference design, so the project stays
+buildable on a smaller budget:
+
+- Cheaper sensor options (a lower-cost IMU and barometer in place of the
+  ICM-42670-P / BMP581)
+- A reduced-feature build — dropping the blackbox flash, the magnetometer or the
+  gimbal outputs where they are not needed
+- A 2-layer variant to cut fabrication cost
+- Widely stocked, low-cost alternatives for the passives, connectors and the
+  regulator
+- Where a substitution changes the firmware, the difference will be documented
+  rather than hidden behind a build flag
+
+Each variant will ship with its own BOM and a short note on what was traded
+away. The reference design stays the one that is documented and tested first.
+
+---
+
 ## Repository Layout
 
 Hardware and firmware live in a **single repository** (monorepo) — when a pin
@@ -388,13 +458,12 @@ custom-fcb/
 │   ├── libs/                custom symbol + footprint libraries
 │   ├── datasheets/
 │   └── production/          Gerber / drill / BOM / CPL — gitignored
-└── firmware/                🚧 in development
-    ├── src/drivers/         imu, baro, mag, gps, crsf, esc_dshot
-    ├── src/fusion/          mahony / madgwick / ekf
-    ├── src/control/         pid, rate/angle loop, mixer
-    ├── src/telemetry/
-    ├── src/safety/          failsafe, arming, watchdog
-    ├── include/
+└── firmware/                🚧 in development — nothing implemented yet
+    ├── drivers/             imu, baro, mag, gps, crsf, esc/dshot
+    ├── fusion/              mahony / madgwick / ekf
+    ├── control/             pid, rate and angle loops, mixer
+    ├── telemetry/
+    ├── safety/              failsafe, arming, watchdog
     └── tests/               host-side unit tests
 ```
 
@@ -425,7 +494,8 @@ custom-fcb/
 |---|---|
 | Toolchain | `arm-none-eabi-gcc` |
 | Build | CMake + Ninja |
-| HAL | STM32CubeF4 (mostly LL; register level on the critical path) |
+| Peripheral layer | STM32CubeF4 (mostly LL; register level on the critical path) |
+| Pin & clock configuration | STM32CubeMX |
 | Debug | ST-Link / J-Link + OpenOCD, SWO trace |
 | Measurement | Loop-time profiling with the DWT cycle counter |
 
@@ -446,14 +516,13 @@ non-functional**, but they should be decided before fabrication.
 
 | # | Issue | Status / recommendation |
 |---|---|---|
-| 1 | **LED drive on PC13/PC14/PC15** — these three pins are in the backup power domain, are limited to 3 mA combined, and the datasheet **explicitly names driving an LED as the forbidden case**. Rev A wires them pin → LED → 1 kΩ → GND (sourcing). | Flip the LEDs to a **sink** configuration (anode to 3.3 V) and/or move two of them to the unused PC0/PC1. This is the one actual datasheet violation. |
-| 2 | **ICM-42670-P ODR ceiling of 1.6 kHz** — this is the low-power member of the family, not the ICM-42688-P. An 8 kHz loop is **not possible** on this board (sensor-limited, not bus-limited). | Target a **1 kHz PID loop**. Because of the aliasing risk, the internal UI filter must be configured deliberately and the IMU soft-mounted. |
-| 3 | **External I²C pull-ups** — I2C1 (R5/R6) is 4.7 kΩ; with cable capacitance the 300 ns rise-time budget is exceeded. | **Drop to 2.2 kΩ** (allows ~160 pF, sink current 1.5 mA). |
-| 4 | **No SBUS support** — the STM32F405's UARTs have no hardware signal inversion. | Fine for CRSF/ELRS. If SBUS is wanted, an external inverter (74LVC1G04) has to be added. |
-| 5 | **The battery divider is off-board**, with no overvoltage protection. | Rev B: 1 kΩ series into PC3 plus a Schottky clamp to 3.3 V. |
-| 6 | **Magnetometer placement** — the on-board IIS2MDC is affected by the field the motor currents produce. | Use the GPS module's compass on J6 as the primary and keep the IIS2MDC as a backup. Place it as far from the power section as the layout allows. |
-| 7 | **LDO thermal budget** — 0.85 W at 500 mA with 5 V in. J5/J6/J7/J10/J11/J12 all supply 3.3 V, and a GPS module alone can draw 100–150 mA. | Thermal via array under the LDO; the load budget belongs in `docs/power-tree.md`. |
-| 8 | **DShot pins after reset** are high-impedance. | Confirm the ESCs do not apply throttle in that state; add pull-downs on the motor lines if they do (Rev B). |
+| 1 | **ICM-42670-P ODR ceiling of 1.6 kHz** — this is the low-power member of the family, not the ICM-42688-P. An 8 kHz loop is **not possible** on this board (sensor-limited, not bus-limited). | Target a **1 kHz PID loop**. Because of the aliasing risk, the internal UI filter must be configured deliberately and the IMU soft-mounted. |
+| 2 | **External I²C pull-ups** — I2C1 (R5/R6) is 4.7 kΩ; with cable capacitance the 300 ns rise-time budget is exceeded. | **Drop to 2.2 kΩ** (allows ~160 pF, sink current 1.5 mA). |
+| 3 | **No SBUS support** — the STM32F405's UARTs have no hardware signal inversion. | Fine for CRSF/ELRS. If SBUS is wanted, an external inverter (74LVC1G04) has to be added. |
+| 4 | **The battery divider is off-board**, with no overvoltage protection. | Rev B: 1 kΩ series into PC3 plus a Schottky clamp to 3.3 V. |
+| 5 | **Magnetometer placement** — the on-board IIS2MDC is affected by the field the motor currents produce. | Use the GPS module's compass on J6 as the primary and keep the IIS2MDC as a backup. Place it as far from the power section as the layout allows. |
+| 6 | **LDO thermal budget** — 0.85 W at 500 mA with 5 V in. J5/J6/J7/J10/J11/J12 all supply 3.3 V, and a GPS module alone can draw 100–150 mA. | Thermal via array under the LDO; the load budget belongs in `docs/power-tree.md`. |
+| 7 | **DShot pins after reset** are high-impedance. | Confirm the ESCs do not apply throttle in that state; add pull-downs on the motor lines if they do (Rev B). |
 
 ---
 
