@@ -518,12 +518,9 @@ non-functional**, but they should be decided before fabrication.
 | # | Issue | Status / recommendation |
 |---|---|---|
 | 1 | **ICM-42670-P ODR ceiling of 1.6 kHz** — this is the low-power member of the family, not the ICM-42688-P. An 8 kHz loop is **not possible** on this board (sensor-limited, not bus-limited). | Target a **1 kHz PID loop**. Because of the aliasing risk, the internal UI filter must be configured deliberately and the IMU soft-mounted. |
-| 2 | **External I²C pull-ups** — I2C1 (R5/R6) is 4.7 kΩ; with cable capacitance the 300 ns rise-time budget is exceeded. | **Drop to 2.2 kΩ** (allows ~160 pF, sink current 1.5 mA). |
-| 3 | **No SBUS support** — the STM32F405's UARTs have no hardware signal inversion. | Fine for CRSF/ELRS. If SBUS is wanted, an external inverter (74LVC1G04) has to be added. |
-| 4 | **The battery divider is off-board**, with no overvoltage protection. | Rev B: 1 kΩ series into PC3 plus a Schottky clamp to 3.3 V. |
-| 5 | **Magnetometer placement** — the on-board IIS2MDC is affected by the field the motor currents produce. | Use the GPS module's compass on J6 as the primary and keep the IIS2MDC as a backup. Place it as far from the power section as the layout allows. |
-| 6 | **LDO thermal budget** — 0.85 W at 500 mA with 5 V in. J5/J6/J7/J10/J11/J12 all supply 3.3 V, and a GPS module alone can draw 100–150 mA. | Thermal via array under the LDO; the load budget belongs in `docs/power-tree.md`. |
-| 7 | **DShot pins after reset** are high-impedance. | Confirm the ESCs do not apply throttle in that state; add pull-downs on the motor lines if they do (Rev B). |
+| 2 | **The battery divider is off-board**, with no overvoltage protection. | Rev B: 1 kΩ series into PC3 plus a Schottky clamp to 3.3 V. |
+| 3 | **LDO thermal budget** — 0.85 W at 500 mA with 5 V in. J5/J6/J7/J10/J11/J12 all supply 3.3 V, and a GPS module alone can draw 100–150 mA. | Thermal via array under the LDO; the load budget belongs in `docs/power-tree.md`. |
+| 4 | **DShot pins after reset** are high-impedance. | Confirm the ESCs do not apply throttle in that state; add pull-downs on the motor lines if they do (Rev B). |
 
 ---
 
