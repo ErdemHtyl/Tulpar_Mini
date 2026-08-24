@@ -451,7 +451,6 @@ custom-fcb/
 ├── README.md
 ├── docs/                    architecture, power tree, pinout, BOM, test plan
 │   ├── architecture.md      design decisions and their rationale (EN)
-│   ├── mimari.md            the same document (TR)
 │   └── images/
 ├── hardware/
 │   ├── MiniTULPAR.kicad_pro / .kicad_sch / .kicad_pcb
